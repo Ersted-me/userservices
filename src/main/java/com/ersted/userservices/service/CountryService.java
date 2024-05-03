@@ -14,8 +14,12 @@ public class CountryService {
     private final CountryRepository countryRepository;
     private final CountryMapper countryMapper;
 
-    public Mono<Country> save(CountryDto dto){
+    public Mono<Country> save(CountryDto dto) {
         Country entityForSave = countryMapper.map(dto);
         return countryRepository.save(entityForSave);
+    }
+
+    public Mono<Country> save(Country newEntity) {
+        return countryRepository.save(newEntity);
     }
 }
