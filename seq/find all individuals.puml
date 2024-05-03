@@ -1,0 +1,37 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+actor "User"
+participant "IndividualController"
+participant "IndividualService"
+participant "UserService"
+participant "AddressService"
+participant "CountryService"
+participant "IndividualMapper"
+participant "Database"
+
+"User" -> "IndividualController": GET \napi/v1/individuals \nполучение информации по всем individuals
+"IndividualController" -> "IndividualService": Вызов метода для получения \nинформации по всем individuals \nfindAll()
+"IndividualService" -> "Database": поиск всех individuals
+"Database" -> "IndividualService": Возвращает всех individuals
+loop загрузка транзитивных зависимостей для каждого пользователя IndividualEntity
+"IndividualService" -> "UserService":Метод получения информация users для IndividualEntity \nfind(String userId)
+"UserService" ->"Database": Поиск записи, где id = userId
+"Database" -> "UserService": Возвращает найденную запись UserEntity
+"UserService" -> "AddressService": Метод получения информации address для UserEntity \nfind(String addressId)
+"AddressService" -> "Database": Поиск записи, где id = addressId
+"Database" -> "AddressService": Возвращает найденную запись AddressEntity
+"AddressService" -> "CountryService": Метод получения информации country для AddressEntity \nfind(String countryId)
+"CountryService" -> "Database": Поиск записи, где id = countryId
+"Database" -> "CountryService": Возвращает найденную запись CountryEntity
+"CountryService" -> "AddressService": Возвращает CountryEntity
+"AddressService" -> "UserService": Возвращает AddressEntity
+"UserService" ->"IndividualService": Возвращает UserEntity
+"IndividualService" ->"IndividualMapper": Маппинг IndividualEntity в DTO \nmapToDto(IndividualEntity entity)
+"IndividualMapper" -> "IndividualService": Возвращает IndividualDto
+end loop
+"IndividualService" -> "IndividualService": сбор всех dto в коллекцию (далее Collection<IndividualDto>)
+"IndividualService" -> "IndividualController": Возвращает Collection<IndividualDto>
+"IndividualController" -> "User": status: 200 \ncontent-type: application\json \nCollection<IndividualDto>
+@enduml

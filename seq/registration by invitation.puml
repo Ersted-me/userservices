@@ -1,0 +1,66 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+actor "User"
+participant "IndividualController"
+participant "ExceptionControllerAdvice"
+participant "IndividualService"
+participant "InvitationService"
+participant "UserService"
+participant "AddressService"
+participant "CountryService"
+participant "IndividualMapper"
+participant "Database"
+
+
+"User" -> "IndividualController": POST \ncontent-type: application\json \napi/v1/individuals/{invitationId} \nрегистрация пользователя по приглашению
+"IndividualController" -> "IndividualService": Вызов метода сохранения individual по приглашению \nsave(IndividualDto dto, String invitationId)
+"IndividualService" -> "InvitationService": Поиск приглашения \nfind(String invitationId)
+"InvitationService" -> "Database": Поиск записи invitations, где id = invitationId
+"Database" -> "InvitationService": Возвращает InvitationEntity
+alt#white #pink Приглашение не найдено
+"Database" -> "InvitationService": Запись InvitationEntity не найдена
+"InvitationService" -> "IndividualService": Возвращает исключение: \nNotFoundException("NOT_FOUND", "Invitation not found")
+"IndividualService" -> "IndividualService": Обработка исключения
+"IndividualService" -> "ExceptionControllerAdvice": Возвращает исключение: \nNotFoundException("NOT_FOUND", "Invitation not found")
+"ExceptionControllerAdvice" -> "User": status: 404 \napplication\json \nErrorResponseDto
+end alt
+"InvitationService" -> "IndividualService": Возвращает InvitationEntity
+"IndividualService" -> "IndividualService": Валидация приглашения по дате экспирации
+alt#white #pink Приглашение просрочено
+"IndividualService" -> "ExceptionControllerAdvice": Возвращает исключение: NotFoundException("METHOD_NOT_ALLOWED", "Invitation date is expired")
+"ExceptionControllerAdvice" -> "User": status: 405 \napplication\json \nErrorResponseDto
+end alt
+"IndividualService" -> "IndividualService": Валидация данных DTO \nна основе данных приглашения
+
+alt Данные в DTO отличаются от данных в приглашении
+"IndividualService" -> "IndividualService": Данные из InvitationEntity подставляются в IndividualDto
+end alt
+
+"IndividualService" -> "IndividualService": вызов метода сохранения индивидуала \nsave(IndividualDto dto)
+alt#gray #lightgray работа метода save(IndividualDto dto)
+"IndividualService" -> "IndividualService": Валидация данных
+"IndividualService" -> "IndividualMapper": маппинг в сущность \nmapToEntity(IndividualDto dto)
+"IndividualMapper" -> "IndividualService": Возвращает сущность \nIndividualEntity
+"IndividualService" -> "UserService":Вызов метода сохранения user'а \nsave(UserEntity entity)
+"UserService" -> "UserService":Валидация данных
+"UserService" -> "AddressService": Вызов метода сохранения address'а \nsave(AddressEntity entity)
+"AddressService" -> "AddressService":Валидация данных
+"AddressService" -> "CountryService":Вызов метода сохранения country \nsave(CountryEntity entity)
+"CountryService" -> "Database": Сохранение CountryEntity в БД
+"Database" -> "CountryService": Возвращает ID сохраненной записи
+"CountryService" -> "AddressService": Возвращает сохраненный объект CountryEntity
+"AddressService" -> "Database": Сохранение AddressEntity в БД
+"Database" -> "AddressService": Возвращает ID сохраненной записи
+"AddressService" -> "UserService": Возвращает сохраненный объект AddressEntity
+"UserService" -> "Database": Сохранение UserEntity в БД
+"Database" -> "UserService": Возвращает ID сохраненной записи
+"UserService" -> "IndividualService": Возвращает сохраненный объект UserEntity
+"IndividualService" -> "Database": Сохранение IndividualEntity в БД
+"Database" -> "IndividualService": Возвращает ID сохраненной записи
+"IndividualService" -> "IndividualService": Возвращает ResponseDto в метод save(IndividualDto dto, String invitationId)
+end alt
+"IndividualService" -> "IndividualController": Возвращает ResponseDto
+"IndividualController" -> "User": status: 200 \ncontent-type: application\json \nResponseDto
+@enduml

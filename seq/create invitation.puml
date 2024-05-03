@@ -1,0 +1,33 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+actor "User"
+participant "InvitationController"
+participant "ExceptionControllerAdvice"
+participant "InvitationService"
+participant "InvitationMapper"
+participant "MerchantService"
+participant "Database"
+
+"User" -> "InvitationController": POST \napi/v1/invitations \nInvitationDto \nсоздание приглашения
+"InvitationController" -> "InvitationService": метод сохранения приглашения \nsave(InvitationDto dto)
+"InvitationService" -> "InvitationService": Валидация данных
+"InvitationService" -> "MerchantService": Проверка существования merchant'а \nfind(String merchantId)
+"MerchantService" -> "Database": Поиск merchant'а, где id = merchantId
+alt#white #pink merchant с id = merchantId не найден
+"MerchantService" -> "InvitationService": Пробрасывает исключение \nNotFoundException("NOT_FOUND", "Merchant not found")
+"InvitationService" -> "InvitationService": Обрабатывает исключение
+"InvitationService" -> "ExceptionControllerAdvice": Пробрасывает исключение \nNotFoundException("BAD_REQUEST", "Merchant not found")
+"ExceptionControllerAdvice" -> "User": status: 404 \napplication\json \nErrorResponseDto
+end alt
+"Database" -> "MerchantService": Возвращает MerchantEntity
+"MerchantService" -> "InvitationService": Возвращает MerchantEntity
+"InvitationService" ->"InvitationMapper": Маппинг в сущность \nmapToEntity(InvitationDto dto)
+"InvitationMapper" ->"InvitationService": Возвращает InvitationEntity
+"InvitationService" -> "Database": Сохраняет InvitationEntity
+"Database" -> "InvitationService": Возвращает InvitationEntity с ID
+"InvitationService" -> "InvitationController": Возвращает ResponseDto
+"InvitationController" -> "User": status: 200 \ncontent-type: application\json \nResponseDto
+
+@enduml

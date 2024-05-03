@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "$orgSpringframeworkBootVersion"
+    id 'io.spring.dependency-management' version "$ioSpringDependencyManagementVersion"
+}
+
+group = 'net.ersted'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = '21'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation "net.ersted:common:1.0.0"
+
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+
+    implementation "org.postgresql:r2dbc-postgresql:$orgPostgresqlR2dbcPostgresql"
+    implementation "org.postgresql:postgresql:$orgPostgresqlPostgresql"
+
+    implementation "org.flywaydb:flyway-core:$orgFlywaydbFlywayCore"
+    implementation "org.flywaydb:flyway-database-postgresql:$orgFlywaydbFlywayDatabasePostgresql"
+
+    implementation "org.projectlombok:lombok:$orgProjectlombokLombok"
+    compileOnly("org.projectlombok:lombok:$orgProjectlombokLombok")
+    annotationProcessor "org.projectlombok:lombok:$orgProjectlombokLombok"
+
+    implementation "org.mapstruct:mapstruct:$orgMapstructMapstruct"
+    annotationProcessor "org.mapstruct:mapstruct-processor:$orgMapstructMapstructProcessor"
+
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonDataFormatXmlVersion"
+
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'io.projectreactor:reactor-test'
+
+    testImplementation 'org.testcontainers:r2dbc'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation "org.testcontainers:postgresql:$testcontainerPostgresqlVersion"
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

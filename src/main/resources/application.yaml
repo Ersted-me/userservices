@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: userservice
+
+  r2dbc:
+    url: r2dbc:pool:postgresql://localhost:5432/person
+    username: userservice_app
+    password: password
+
+
+  flyway:
+    url: jdbc:postgresql://localhost:5432/person
+    user: userservice_app
+    password: password
+    locations: classpath:db/migration/postgresql
+    default-schema: person

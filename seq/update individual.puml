@@ -1,0 +1,65 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor "User"
+participant "IndividualController"
+participant "IndividualService"
+participant "ProfileHistoryService"
+participant "UserService"
+participant "AddressService"
+participant "CountryService"
+participant "IndividualMapper"
+participant "Database"
+
+"User" -> "IndividualController": PUT \ncontent-type: application\json \napi/v1/individuals/{id} \nобновление individual
+"IndividualController" -> "IndividualService": Вызов метода обновления \nupdate(IndividualDto dto)
+
+alt#grey #lightgrey Получение старой записи individuals
+"IndividualService" -> "Database": поиск individual'а, где id = individualId
+alt#white #pink individual с id = individualId не найден
+"Database" -> "IndividualService": IndividualEntity не найден
+"IndividualService" -> "ExceptionControllerAdvice": Возвращает исключение: \nNotFoundException("NOT_FOUND", "Individual not found")
+"ExceptionControllerAdvice" -> "User": status: 404 \napplication\json \nErrorResponseDto
+end alt
+"Database" -> "IndividualService": Возвращает IndividualEntity (далее oldIndividual)
+"IndividualService" -> "UserService":Метод получения информация users для IndividualEntity \nfind(String userId)
+"UserService" ->"Database": Поиск записи, где id = userId
+"Database" -> "UserService": Возвращает найденную запись UserEntity
+"UserService" -> "AddressService": Метод получения информации address для UserEntity \nfind(String addressId)
+"AddressService" -> "Database": Поиск записи, где id = addressId
+"Database" -> "AddressService": Возвращает найденную запись AddressEntity
+"AddressService" -> "CountryService": Метод получения информации country для AddressEntity \nfind(String countryId)
+"CountryService" -> "Database": Поиск записи, где id = countryId
+"Database" -> "CountryService": Возвращает найденную запись CountryEntity
+"CountryService" -> "AddressService": Возвращает CountryEntity
+"AddressService" -> "UserService": Возвращает AddressEntity
+"UserService" ->"IndividualService": Возвращает UserEntity
+end alt
+alt#grey #lightgrey Обновление individuals (далее updatedIndividual)
+"IndividualService" -> "UserService": Метод обновления информации users для IndividualEntity \nupdate(UserDto dto, String userId)
+"UserService" ->"Database": обновление записи, где id = userId
+"Database" -> "UserService": Возвращает обновленную запись UserEntity
+"UserService" -> "AddressService": Метод обновления информации address для UserEntity \nupdate(AddressDto dto, String addressId)
+"AddressService" -> "Database": обновление записи, где id = addressId
+"Database" -> "AddressService": Возвращает обновленную запись AddressEntity
+"AddressService" -> "CountryService": Метод обновления информации country для AddressEntity \nupdate(CountryDto dto, String countryId)
+"CountryService" -> "Database": обновление записи, где id = countryId
+"Database" -> "CountryService": Возвращает обновленную запись CountryEntity
+"CountryService" -> "AddressService": Возвращает CountryEntity
+"AddressService" -> "UserService": Возвращает AddressEntity
+"UserService" ->"IndividualService": Возвращает UserEntity
+end alt
+alt#grey #lightgrey Сохранение истории профиля
+"IndividualService" -> "IndividualService": вызов метода создающего json с измененными полями
+"IndividualService" -> "ProfileHistoryService": вызов метода для сохранения лога изменений \nsave(String individualId, String profileType, String reason, String comment, String changedValues)
+"ProfileHistoryService" -> "Database": Сохраняет запись в profile_history
+"Database" -> "ProfileHistoryService": Возвращает ProfileEntity
+"ProfileHistoryService" -> "IndividualService": Возвращает ProfileEntity
+end alt
+"IndividualService" ->"IndividualMapper": Маппинг updatedIndividual в DTO \nmapToDto(IndividualEntity entity)
+"IndividualMapper" -> "IndividualService": Возвращает IndividualDto
+"IndividualService" -> "IndividualController": Возвращает IndividualDto
+"IndividualController" -> "User": status: 200 \ncontent-type: application\json \nIndividualDto
+@enduml

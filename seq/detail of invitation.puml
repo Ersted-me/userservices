@@ -1,0 +1,26 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+actor "User"
+participant "InvitationController"
+participant "ExceptionControllerAdvice"
+participant "InvitationService"
+participant "InvitationMapper"
+participant "MerchantService"
+participant "Database"
+
+"User" -> "InvitationController": GET \napi/v1/invitations/{invitationId} \nполучить ифнормацию по приглашению
+"InvitationController" ->"InvitationService": Вызов метода для получения \nинформации по приглашению \nfind(String invitationId)
+"InvitationService"->"Database": Поиск invitations, где id = invitationId
+alt#white #pink Запись invitations с id = invitationId не найдена
+"Database" -> "InvitationService": Запись InvitationEntity не найдена
+"InvitationService" -> "ExceptionControllerAdvice": Возвращает исключение: \nNotFoundException("NOT_FOUND", "Invitation not found")
+"ExceptionControllerAdvice" -> "User": status: 404 \napplication\json \nErrorResponseDto
+end alt
+"Database" -> "InvitationService": Возвращает InvitationEntity
+"InvitationService" -> "InvitationMapper": Маппинг InvitationEntity в дто \nmapToDto(InvitationEntity entity)
+"InvitationMapper" -> "InvitationService": Возвращает InvitationDto
+"InvitationService" -> "InvitationController": Возвращает InvitationDto
+"InvitationController" -> "User": status: 200 \napplication\json \nInvitationDto
+@enduml

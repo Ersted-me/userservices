@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  posgres:
+    container_name: userservice_postgres_db
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: userservice_app
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: person
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
