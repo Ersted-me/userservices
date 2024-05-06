@@ -76,7 +76,7 @@ class AddressServiceTest {
 
     @Test
     @DisplayName("save transient address entity with transient country association to database")
-    public void givenTransientAddressAndTransientCountry_whenSave_thenPersistAddressWithPersistCountryIsReturned() {
+    public void givenTransientAddressAndTransientCountry_whenSave_thenPersistAddressWithPersistCountryAreReturned() {
         //given
         Address transientAddressWithAssociations = AddressDataUtils.transientAddressWithAssociations();
         Country associationTransientCountry = transientAddressWithAssociations.getCountry();
@@ -97,7 +97,7 @@ class AddressServiceTest {
 
     @Test
     @DisplayName("save transient address entity with persist country association to database")
-    public void givenTransientAddressAndPersistCountry_whenSave_thenPersistAddressWithPersistCountryIsReturned() {
+    public void givenTransientAddressAndPersistCountry_whenSave_thenPersistAddressWithPersistCountryAreReturned() {
         //given
         Address transientAddressWithAssociations = AddressDataUtils.transientAddressWithPersistAssociations();
 
