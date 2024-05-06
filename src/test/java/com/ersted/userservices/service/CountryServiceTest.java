@@ -28,7 +28,7 @@ class CountryServiceTest {
 
     @Test
     @DisplayName("Save transient country entity to Database")
-    public void givenTransientCountry_whenSave_thenCountryIsReturned(){
+    public void givenTransientCountry_whenSave_thenCountryIsReturned() {
         //given
         Country transientCountry = CountryDataUtils.transientCountry();
         Country persistCountry = CountryDataUtils.persistCountry();
@@ -36,7 +36,7 @@ class CountryServiceTest {
                 .willReturn(Mono.just(persistCountry));
         //when
         StepVerifier.create(countryService.save(transientCountry))
-        //then
+                //then
                 .expectNextMatches(country -> !country.isNew())
                 .verifyComplete();
         verify(countryRepository, times(1)).save(any(Country.class));
@@ -44,7 +44,7 @@ class CountryServiceTest {
 
     @Test
     @DisplayName("Save nullable country entity to database")
-    public void givenNullableCountry_whenSave_thenMonoEmptyIsReturned(){
+    public void givenNullableCountry_whenSave_thenMonoEmptyIsReturned() {
         //given
         Country country = null;
         //when
@@ -57,7 +57,7 @@ class CountryServiceTest {
 
     @Test
     @DisplayName("Save persist country entity to database")
-    public void givenPersistCountry_whenSave_thenPersistIsReturnedWithoutCallingRepository(){
+    public void givenPersistCountry_whenSave_thenPersistIsReturnedWithoutCallingRepository() {
         //given
         Country persistCountry = CountryDataUtils.persistCountry();
         //when

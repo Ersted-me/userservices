@@ -16,7 +16,6 @@ import reactor.test.StepVerifier;
 
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,7 +41,7 @@ class AddressServiceTest {
                 .willReturn(Mono.just(persistAddress));
         //when
         StepVerifier.create(addressService.save(transientAddress))
-        //then
+                //then
                 .expectNextMatches(address -> !address.isNew())
                 .verifyComplete();
         verify(addressRepository, times(1)).save(any(Address.class));
@@ -83,9 +82,9 @@ class AddressServiceTest {
         Country associationTransientCountry = transientAddressWithAssociations.getCountry();
 
         BDDMockito.given(addressRepository.save(any(Address.class)))
-                        .willReturn(Mono.just(AddressDataUtils.persistAddressWithAssociations()));
+                .willReturn(Mono.just(AddressDataUtils.persistAddressWithAssociations()));
         BDDMockito.given(countryService.save(any(Country.class)))
-                        .willReturn(Mono.just(associationTransientCountry));
+                .willReturn(Mono.just(associationTransientCountry));
         //when
         StepVerifier.create(addressService.save(transientAddressWithAssociations))
                 //then
