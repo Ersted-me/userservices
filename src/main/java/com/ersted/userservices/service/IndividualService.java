@@ -1,8 +1,13 @@
 package com.ersted.userservices.service;
 
 import com.ersted.userservices.entity.Individual;
+import com.ersted.userservices.enums.ResponseStatus;
+import com.ersted.userservices.exception.BadRequestException;
+import com.ersted.userservices.mapper.IndividualMapper;
 import com.ersted.userservices.repository.IndividualRepository;
 import lombok.RequiredArgsConstructor;
+import net.ersted.dto.IndividualDto;
+import net.ersted.dto.ResponseDto;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -12,6 +17,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class IndividualService {
     private final IndividualRepository individualRepository;
+    private final IndividualMapper individualMapper;
     private final UserService userService;
 
     public Mono<Individual> save(Individual transientIndividual) {
@@ -33,5 +39,12 @@ public class IndividualService {
         }
         transientIndividual.setUserId(transientIndividual.getUser().getId());
         return individualRepository.save(transientIndividual);
+    }
+
+    public Mono<ResponseDto> registration(IndividualDto dto) {
+        Individual transientIndividual = individualMapper.map(dto);
+        return this.save(transientIndividual)
+                .switchIfEmpty(Mono.error(new BadRequestException("BAD_REQUEST", "Body can not be blank")))
+                .flatMap(individual -> Mono.just(new ResponseDto(ResponseStatus.SUCCESS.name(), "Individual has been successfully registered", individual.getId())));
     }
 }
