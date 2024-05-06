@@ -2,8 +2,12 @@ package com.ersted.userservices.service;
 
 import com.ersted.userservices.entity.Individual;
 import com.ersted.userservices.entity.User;
+import com.ersted.userservices.enums.ResponseStatus;
+import com.ersted.userservices.exception.BadRequestException;
+import com.ersted.userservices.mapper.IndividualMapper;
 import com.ersted.userservices.repository.IndividualRepository;
 import com.ersted.userservices.utils.IndividualDataUtils;
+import net.ersted.dto.IndividualDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +20,6 @@ import reactor.test.StepVerifier;
 
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,6 +28,8 @@ import static org.mockito.Mockito.verify;
 class IndividualServiceTest {
     @Mock
     private IndividualRepository individualRepository;
+    @Mock
+    private IndividualMapper individualMapper;
     @Mock
     private UserService userService;
     @InjectMocks
@@ -108,5 +113,44 @@ class IndividualServiceTest {
                 .verifyComplete();
         verify(individualRepository, times(1)).save(any(Individual.class));
         verify(userService, times(0)).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("registration individual")
+    public void givenIndividualDto_whenRegistration_thenResponseDtoIsReturned() {
+        //given
+        IndividualDto individualDto = IndividualDataUtils.individualDto();
+
+        Individual transientIndividual = IndividualDataUtils.transientIndividual();
+        BDDMockito.given(individualRepository.save(transientIndividual))
+                .willReturn(Mono.just(IndividualDataUtils.persistIndividual()));
+
+        BDDMockito.given(individualMapper.map(individualDto))
+                .willReturn(transientIndividual);
+
+        //when
+        StepVerifier.create(individualService.registration(individualDto))
+                //then
+                .expectNextMatches(responseDto -> Objects.nonNull(responseDto.getId())
+                        && Objects.equals(IndividualDataUtils.persistIndividual().getId(), responseDto.getId())
+                        && "Individual has been successfully registered".equals(responseDto.getMessage())
+                        && ResponseStatus.SUCCESS.name().equals(responseDto.getStatus()))
+                .verifyComplete();
+
+        verify(individualMapper, times(1)).map(any(IndividualDto.class));
+    }
+
+    @Test
+    @DisplayName("registration nullable individual")
+    public void givenNullableIndividualDto_whenRegistration_thenMonoErrorIsReturned() {
+        //given
+        IndividualDto nullableIndividualDto = null;
+        //when
+        StepVerifier.create(individualService.registration(nullableIndividualDto))
+                //then
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException bd
+                        && "BAD_REQUEST".equals(bd.getCode())
+                        && "Body can not be blank".equals(bd.getMessage()))
+                .verify();
     }
 }
