@@ -43,12 +43,12 @@ class CountryServiceTest {
     }
 
     @Test
-    @DisplayName("Save nullable transient country entity to database")
-    public void givenNullableTransientCountry_whenSave_thenMonoEmptyIsReturned(){
+    @DisplayName("Save nullable country entity to database")
+    public void givenNullableCountry_whenSave_thenMonoEmptyIsReturned(){
         //given
-        Country transientCountry = null;
+        Country country = null;
         //when
-        StepVerifier.create(countryService.save(transientCountry))
+        StepVerifier.create(countryService.save(country))
                 //then
                 .expectNextCount(0)
                 .verifyComplete();
