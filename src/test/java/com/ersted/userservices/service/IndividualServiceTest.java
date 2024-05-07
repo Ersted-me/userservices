@@ -15,12 +15,14 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Objects;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -152,5 +154,67 @@ class IndividualServiceTest {
                         && "BAD_REQUEST".equals(bd.getCode())
                         && "Body can not be blank".equals(bd.getMessage()))
                 .verify();
+    }
+
+    @Test
+    @DisplayName("find all individuals with transient")
+    void givenIndividualsWithTransient_whenFind_thenIndividualsDtosAreReturned() {
+        //given
+        Individual persistIndividualWithAssociation = IndividualDataUtils.persistIndividualWithAssociation();
+        User user = persistIndividualWithAssociation.getUser();
+        String userId = user.getId();
+        BDDMockito.given(individualRepository.findAll())
+                .willReturn(Flux.just(persistIndividualWithAssociation));
+
+        BDDMockito.given(userService.findWithTransient(userId))
+                .willReturn(Mono.just(user));
+
+        IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();
+        BDDMockito.given(individualMapper.map(persistIndividualWithAssociation))
+                .willReturn(individualDto);
+        //when
+        StepVerifier.create(individualService.findAllWithTransient())
+                //then
+                .expectNextMatches(Objects::nonNull)
+                .verifyComplete();
+        verify(individualRepository, times(1)).findAll();
+        verify(userService, times(1)).findWithTransient(userId);
+        verify(individualMapper, times(1)).map(persistIndividualWithAssociation);
+    }
+
+    @Test
+    @DisplayName("find all individuals")
+    void givenIndividuals_whenFind_thenIndividualsDtosAreReturned() {
+        //given
+        Individual persistIndividual = IndividualDataUtils.persistIndividual();
+        BDDMockito.given(individualRepository.findAll())
+                .willReturn(Flux.just(persistIndividual));
+        IndividualDto individualDto = IndividualDataUtils.individualDto();
+        BDDMockito.given(individualMapper.map(persistIndividual))
+                .willReturn(individualDto);
+        //when
+        StepVerifier.create(individualService.findAllWithTransient())
+                //then
+                .expectNextMatches(Objects::nonNull)
+                .verifyComplete();
+        verify(individualRepository, times(1)).findAll();
+        verify(userService, times(0)).findWithTransient(anyString());
+        verify(individualMapper, times(1)).map(persistIndividual);
+    }
+
+    @Test
+    @DisplayName("find all non exists individuals")
+    void givenEmptyRepository_whenFind_thenEmptyListIsReturned() {
+        //given
+        BDDMockito.given(individualRepository.findAll())
+                .willReturn(Flux.empty());
+        //when
+        StepVerifier.create(individualService.findAllWithTransient())
+                //then
+                .expectNextCount(0)
+                .verifyComplete();
+        verify(individualRepository, times(1)).findAll();
+        verify(userService, times(0)).findWithTransient(anyString());
+        verify(individualMapper, times(0)).map(any(Individual.class));
     }
 }

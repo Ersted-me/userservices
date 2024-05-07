@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import net.ersted.dto.IndividualDto;
 import net.ersted.dto.ResponseDto;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -54,5 +55,27 @@ public class IndividualService {
         return this.save(transientIndividual)
                 .switchIfEmpty(Mono.error(new BadRequestException("BAD_REQUEST", "Body can not be blank")))
                 .flatMap(individual -> Mono.just(new ResponseDto(ResponseStatus.SUCCESS.name(), "Individual has been successfully registered", individual.getId().toString())));
+    }
+
+    public Flux<IndividualDto> findAllWithTransient() {
+        return individualRepository.findAll()
+                .flatMap(this::loadTransient)
+                .map(individualMapper::map);
+    }
+
+    private Mono<Individual> loadTransient(Individual individual) {
+        if (Objects.isNull(individual)) {
+            return Mono.empty();
+        }
+        if (Objects.isNull(individual.getUserId())) {
+            return Mono.just(individual);
+        }
+        return userService.findWithTransient(individual.getUserId())
+                .map(user -> {
+                    if (Objects.nonNull(user)) {
+                        individual.setUser(user);
+                    }
+                    return individual;
+                });
     }
 }
