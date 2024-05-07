@@ -13,7 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Objects;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -66,5 +69,32 @@ class CountryServiceTest {
                 .expectNextMatches(country -> !country.isNew())
                 .verifyComplete();
         verify(countryRepository, times(0)).save(any(Country.class));
+    }
+
+    @Test
+    void givenExistCountryId_whenFind_thenCountryIsReturned() {
+        //given
+        String existCountryId = CountryDataUtils.persistCountry().getId();
+        BDDMockito.given(countryRepository.findById(existCountryId))
+                .willReturn(Mono.just(CountryDataUtils.persistCountry()));
+        //when
+        StepVerifier.create(countryService.find(existCountryId))
+                //then
+                .expectNextMatches(country -> Objects.nonNull(country) && !country.isNew())
+                .verifyComplete();
+        verify(countryRepository, times(1)).findById(existCountryId);
+    }
+
+    @Test
+    void givenNonExistCountryId_whenFind_thenMonoEmptyIsReturned() {
+        //given
+        BDDMockito.given(countryRepository.findById(anyString()))
+                .willReturn(Mono.empty());
+        //when
+        StepVerifier.create(countryService.find(anyString()))
+                //then
+                .expectNextCount(0)
+                .verifyComplete();
+        verify(countryRepository, times(1)).findById(anyString());
     }
 }

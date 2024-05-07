@@ -20,7 +20,7 @@ public class CountryDataUtils {
     public static Country persistCountry(){
         LocalDateTime currentTime = LocalDateTime.now();
         return Country.builder()
-                .id("persistCountry")
+                .id("123e4567-e89b-42d3-a456-556642440000")
                 .created(currentTime)
                 .updated(currentTime)
                 .name("Russia")

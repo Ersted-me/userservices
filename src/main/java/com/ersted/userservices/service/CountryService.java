@@ -26,4 +26,8 @@ public class CountryService {
         transientCountry.setUpdated(currentDateTime);
         return countryRepository.save(transientCountry);
     }
+
+    public Mono<Country> find(String countryId){
+        return countryRepository.findById(countryId);
+    }
 }
