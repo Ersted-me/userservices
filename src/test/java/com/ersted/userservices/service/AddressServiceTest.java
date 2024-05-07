@@ -17,6 +17,7 @@ import reactor.test.StepVerifier;
 import java.util.Objects;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -112,5 +113,58 @@ class AddressServiceTest {
 
         verify(addressRepository, times(1)).save(any(Address.class));
         verify(countryService, times(0)).save(any(Country.class));
+    }
+
+    @Test
+    @DisplayName("find by id address with transients")
+    public void givenAddressIdWithTransients_whenFind_thenAddressWithTransientAreReturned() {
+        //given
+        Address persistAddressWithAssociations = AddressDataUtils.persistAddressWithAssociations();
+        String addressId = persistAddressWithAssociations.getId();
+        Country transientCountry = persistAddressWithAssociations.getCountry();
+        String countryId = transientCountry.getId();
+
+        BDDMockito.given(addressRepository.findById(addressId))
+                .willReturn(Mono.just(persistAddressWithAssociations));
+        BDDMockito.given(countryService.find(countryId))
+                .willReturn(Mono.just(transientCountry));
+        //when
+        StepVerifier.create(addressService.findWithTransient(addressId))
+                //then
+                .expectNextMatches(address -> Objects.nonNull(address) && !address.isNew()
+                        && Objects.nonNull(address.getCountry()) && !address.getCountry().isNew())
+                .verifyComplete();
+        verify(addressRepository, times(1)).findById(addressId);
+        verify(countryService, times(1)).find(countryId);
+    }
+
+    @Test
+    @DisplayName("find by id non exist address")
+    public void givenNonExistAddressId_whenFind_thenMonoEmptyIsReturned() {
+        //given
+        BDDMockito.given(addressRepository.findById(anyString()))
+                .willReturn(Mono.empty());
+        //when
+        StepVerifier.create(addressService.findWithTransient(anyString()))
+                //then
+                .expectNextCount(0)
+                .verifyComplete();
+        verify(addressRepository, times(1)).findById(anyString());
+        verify(countryService, times(0)).find(anyString());
+    }
+
+    @Test
+    @DisplayName("find by id address without transients")
+    public void givenAddressId_whenFind_thenAddressIsReturned() {
+        //given
+        Address persistAddress = AddressDataUtils.persistAddress();
+        String addressId = persistAddress.getId();
+        BDDMockito.given(addressRepository.findById(addressId))
+                .willReturn(Mono.just(persistAddress));
+        //when
+        StepVerifier.create(addressService.findWithTransient(addressId))
+                //then
+                .expectNextMatches(address -> Objects.nonNull(address) && !address.isNew() && Objects.isNull(address.getCountry()) && Objects.isNull(address.getCountryId()))
+                .verifyComplete();
     }
 }

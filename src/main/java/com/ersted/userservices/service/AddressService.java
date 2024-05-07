@@ -42,4 +42,20 @@ public class AddressService {
         transientAddress.setCountryId(transientAddress.getCountry().getId());
         return addressRepository.save(transientAddress);
     }
+
+    public Mono<Address> findWithTransient(String addressId) {
+        return addressRepository.findById(addressId)
+                .flatMap(address -> {
+                    if (Objects.isNull(address.getCountryId())) {
+                        return Mono.just(address);
+                    }
+                    return countryService.find(address.getCountryId())
+                            .map(country -> {
+                                if (Objects.nonNull(country)) {
+                                    address.setCountry(country);
+                                }
+                                return address;
+                            });
+                });
+    }
 }
