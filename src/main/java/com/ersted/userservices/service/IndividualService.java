@@ -11,6 +11,7 @@ import net.ersted.dto.ResponseDto;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -27,6 +28,13 @@ public class IndividualService {
         if (!transientIndividual.isNew()) {
             return Mono.just(transientIndividual);
         }
+
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        transientIndividual.setCreated(currentDateTime);
+        transientIndividual.setUpdated(currentDateTime);
+        transientIndividual.setArchivedAt(currentDateTime);
+        transientIndividual.setVerifiedAt(currentDateTime);
+
         if (Objects.isNull(transientIndividual.getUser())) {
             return individualRepository.save(transientIndividual);
         }
@@ -45,6 +53,6 @@ public class IndividualService {
         Individual transientIndividual = individualMapper.map(dto);
         return this.save(transientIndividual)
                 .switchIfEmpty(Mono.error(new BadRequestException("BAD_REQUEST", "Body can not be blank")))
-                .flatMap(individual -> Mono.just(new ResponseDto(ResponseStatus.SUCCESS.name(), "Individual has been successfully registered", individual.getId())));
+                .flatMap(individual -> Mono.just(new ResponseDto(ResponseStatus.SUCCESS.name(), "Individual has been successfully registered", individual.getId().toString())));
     }
 }

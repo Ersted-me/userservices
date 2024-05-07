@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -21,6 +22,11 @@ public class UserService {
         if (!transientUser.isNew()) {
             return Mono.just(transientUser);
         }
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        transientUser.setCreated(currentDateTime);
+        transientUser.setUpdated(currentDateTime);
+        transientUser.setArchivedAt(currentDateTime);
+        transientUser.setVerifiedAt(currentDateTime);
         if (Objects.isNull(transientUser.getAddress())) {
             return userRepository.save(transientUser);
         }

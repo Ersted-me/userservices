@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class AddressService {
@@ -13,13 +16,17 @@ public class AddressService {
     private final CountryService countryService;
 
     public Mono<Address> save(Address transientAddress) {
-        if (transientAddress == null) {
+        if (Objects.isNull(transientAddress)) {
             return Mono.empty();
         }
 
         if (!transientAddress.isNew()) {
             return Mono.just(transientAddress);
         }
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        transientAddress.setCreated(currentDateTime);
+        transientAddress.setUpdated(currentDateTime);
+        transientAddress.setArchived(currentDateTime);
 
         if (transientAddress.getCountry() == null) {
             return addressRepository.save(transientAddress);
