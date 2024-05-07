@@ -72,6 +72,7 @@ class CountryServiceTest {
     }
 
     @Test
+    @DisplayName("find by id exist country functionality")
     void givenExistCountryId_whenFind_thenCountryIsReturned() {
         //given
         String existCountryId = CountryDataUtils.persistCountry().getId();
@@ -86,6 +87,7 @@ class CountryServiceTest {
     }
 
     @Test
+    @DisplayName("find by id non exist country functionality")
     void givenNonExistCountryId_whenFind_thenMonoEmptyIsReturned() {
         //given
         BDDMockito.given(countryRepository.findById(anyString()))
