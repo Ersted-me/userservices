@@ -14,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table("users")
+@Table("person.users")
 public class User implements Persistable<String> {
     @Id
     private String id;

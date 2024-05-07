@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table("individuals")
+@Table("person.individuals")
 public class Individual implements Persistable<String> {
     @Id
     private String id;
