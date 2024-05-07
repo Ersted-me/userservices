@@ -17,6 +17,7 @@ import reactor.test.StepVerifier;
 import java.util.Objects;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -110,5 +111,59 @@ class UserServiceTest {
                 .verifyComplete();
         verify(userRepository, times(1)).save(any(User.class));
         verify(addressService, times(0)).save(any(Address.class));
+    }
+
+    @Test
+    @DisplayName("find by id user with transients")
+    void givenUserWithTransient_whenFind_thenUserWithTransientIsReturned() {
+        //given
+        User persistUserWithAssociations = UserDataUtils.persistUserWithAssociations();
+        String userId = persistUserWithAssociations.getId();
+        Address address = persistUserWithAssociations.getAddress();
+        String addressId = address.getId();
+        BDDMockito.given(userRepository.findById(userId))
+                .willReturn(Mono.just(persistUserWithAssociations));
+        BDDMockito.given(addressService.findWithTransient(addressId))
+                .willReturn(Mono.just(address));
+        //when
+        StepVerifier.create(userService.findWithTransient(userId))
+                //then
+                .expectNextMatches(user -> Objects.nonNull(user) && !user.isNew()
+                        && Objects.nonNull(user.getAddress()) && !user.getAddress().isNew())
+                .verifyComplete();
+        verify(userRepository, times(1)).findById(userId);
+        verify(addressService, times(1)).findWithTransient(addressId);
+    }
+
+    @Test
+    @DisplayName("find by id user")
+    void givenUser_whenFind_thenUserIsReturned() {
+        //given
+        User persistUser = UserDataUtils.persistUser();
+        String userId = persistUser.getId();
+        BDDMockito.given(userRepository.findById(userId))
+                .willReturn(Mono.just(persistUser));
+        //when
+        StepVerifier.create(userService.findWithTransient(userId))
+                //then
+                .expectNextMatches(user -> Objects.nonNull(user) && !user.isNew() && Objects.isNull(user.getAddress()))
+                .verifyComplete();
+        verify(userRepository, times(1)).findById(userId);
+        verify(addressService, times(0)).findWithTransient(anyString());
+    }
+
+    @Test
+    @DisplayName("find by id non exist user")
+    void givenNonExistUser_whenFind_thenMonoEmptyIsReturned() {
+        //given
+        BDDMockito.given(userRepository.findById(anyString()))
+                .willReturn(Mono.empty());
+        //when
+        StepVerifier.create(userService.findWithTransient(anyString()))
+        //then
+                .expectNextCount(0)
+                .verifyComplete();
+        verify(userRepository, times(1)).findById(anyString());
+        verify(addressService, times(0)).findWithTransient(anyString());
     }
 }

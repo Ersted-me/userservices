@@ -26,7 +26,7 @@ public class UserDataUtils {
     public static User persistUser() {
         LocalDateTime currentTime = LocalDateTime.now();
         return User.builder()
-                .id("persistUser")
+                .id("1ba34cca-2ef6-4a69-9fef-7cc726ccc076")
                 .secretKey("secretKey")
                 .created(currentTime)
                 .updated(currentTime)

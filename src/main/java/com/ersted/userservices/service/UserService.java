@@ -40,4 +40,20 @@ public class UserService {
         transientUser.setAddressId(transientUser.getAddress().getId());
         return userRepository.save(transientUser);
     }
+
+    public Mono<User> findWithTransient(String userId) {
+        return userRepository.findById(userId)
+                .flatMap(user -> {
+                    if (Objects.isNull(user.getAddressId())) {
+                        return Mono.just(user);
+                    }
+                    return addressService.findWithTransient(user.getAddressId())
+                            .map(address -> {
+                                if (Objects.nonNull(address)) {
+                                    user.setAddress(address);
+                                }
+                                return user;
+                            });
+                });
+    }
 }
