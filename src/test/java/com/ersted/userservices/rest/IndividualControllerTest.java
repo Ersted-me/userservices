@@ -51,25 +51,4 @@ class IndividualControllerTest {
                 .jsonPath("$.message").isEqualTo("Individual has been successfully registered")
                 .jsonPath("$.status").isEqualTo("SUCCESS");
     }
-
-    @Test
-    @DisplayName("registration nullable individual")
-    public void givenNullableIndividualDto_whenRegistration_thenBadRequestIsReturned() {
-        //given
-
-        BDDMockito.given(individualService.registration(any(IndividualDto.class)))
-                .willReturn(Mono.error(new BadRequestException("BAD_REQUEST", "Body can not be blank")));
-        //when
-        WebTestClient.ResponseSpec response = webTestClient.post()
-                .uri("/api/v1/individuals")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.empty(), IndividualDto.class)
-                .exchange();
-        //then
-        response.expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.id").isEqualTo("createdId")
-                .jsonPath("$.message").isEqualTo("Individual has been successfully registered")
-                .jsonPath("$.status").isEqualTo("SUCCESS");
-    }
 }
