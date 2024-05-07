@@ -166,5 +166,7 @@ class AddressServiceTest {
                 //then
                 .expectNextMatches(address -> Objects.nonNull(address) && !address.isNew() && Objects.isNull(address.getCountry()) && Objects.isNull(address.getCountryId()))
                 .verifyComplete();
+        verify(addressRepository, times(1)).findById(anyString());
+        verify(countryService, times(0)).find(anyString());
     }
 }

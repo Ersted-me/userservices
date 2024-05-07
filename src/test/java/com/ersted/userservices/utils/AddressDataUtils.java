@@ -24,7 +24,7 @@ public class AddressDataUtils {
     public static Address persistAddress() {
         LocalDateTime currentTime = LocalDateTime.now();
         return Address.builder()
-                .id("persistAddress")
+                .id("a8098c1a-f86e-11da-bd1a-00112444be1e")
                 .created(currentTime)
                 .updated(currentTime)
                 .countryId(null)
