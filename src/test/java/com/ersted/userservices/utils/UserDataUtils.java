@@ -2,6 +2,7 @@ package com.ersted.userservices.utils;
 
 import com.ersted.userservices.entity.Address;
 import com.ersted.userservices.entity.User;
+import net.ersted.dto.UserDto;
 
 import java.time.LocalDateTime;
 
@@ -53,5 +54,9 @@ public class UserDataUtils {
         persistUser.setAddressId(persistAddress.getId());
         persistUser.setAddress(persistAddress);
         return persistUser;
+    }
+
+    public static UserDto userDto() {
+        return new UserDto("Bob", "Murey", AddressDataUtils.addressDto());
     }
 }

@@ -34,7 +34,7 @@ class IndividualControllerTest {
     @DisplayName("registration individual")
     public void givenIndividualDto_whenRegistration_thenResponseDtoIsReturned() {
         //given
-        IndividualDto individualDto = IndividualDataUtils.individualDto();
+        IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();
         ResponseDto successResponse = ResponseDataUtils.success("createdId", "Individual has been successfully registered");
         BDDMockito.given(individualService.registration(any(IndividualDto.class)))
                 .willReturn(Mono.just(successResponse));

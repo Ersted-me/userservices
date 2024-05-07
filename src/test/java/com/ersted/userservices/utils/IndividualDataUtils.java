@@ -55,6 +55,14 @@ public class IndividualDataUtils {
         return persistIndividual;
     }
 
+    public static IndividualDto individualDtoWithTransient() {
+        String passportNumber = "1234123456";
+        String phoneNumber = "79998887766";
+        String email = "email@mail.ru";
+        UserDto user = UserDataUtils.userDto();
+        return new IndividualDto(passportNumber, phoneNumber, email, user);
+    }
+
     public static IndividualDto individualDto() {
         String passportNumber = "1234123456";
         String phoneNumber = "79998887766";

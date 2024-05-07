@@ -26,7 +26,7 @@ public class ItIndividualControllerTest {
     @DisplayName("registration individual")
     public void givenIndividualDto_whenRegistration_thenResponseDtoIsReturned() {
         //given
-        IndividualDto individualDto = IndividualDataUtils.individualDto();
+        IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();
 
         //when
         WebTestClient.ResponseSpec response = webTestClient.post()

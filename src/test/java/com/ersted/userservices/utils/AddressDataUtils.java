@@ -2,6 +2,7 @@ package com.ersted.userservices.utils;
 
 import com.ersted.userservices.entity.Address;
 import com.ersted.userservices.entity.Country;
+import net.ersted.dto.AddressDto;
 
 import java.time.LocalDateTime;
 
@@ -62,5 +63,9 @@ public class AddressDataUtils {
         persistAddress.setCountryId(persistCountry.getId());
 
         return persistAddress;
+    }
+
+    public static AddressDto addressDto() {
+        return new AddressDto("Lenina street", "123456", "Moscow", "Moscow", CountryDataUtils.countryDto());
     }
 }

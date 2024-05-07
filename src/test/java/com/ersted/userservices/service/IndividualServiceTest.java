@@ -119,7 +119,7 @@ class IndividualServiceTest {
     @DisplayName("registration individual")
     public void givenIndividualDto_whenRegistration_thenResponseDtoIsReturned() {
         //given
-        IndividualDto individualDto = IndividualDataUtils.individualDto();
+        IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();
 
         Individual transientIndividual = IndividualDataUtils.transientIndividual();
         BDDMockito.given(individualRepository.save(transientIndividual))
