@@ -30,4 +30,19 @@ public class CountryService {
     public Mono<Country> find(Integer countryId) {
         return countryRepository.findById(countryId);
     }
+
+    public Mono<Country> update(Country newCountry, Integer countryId) {
+        if (Objects.isNull(newCountry) && Objects.isNull(countryId)) {
+            return Mono.empty();
+        }
+        return countryRepository.findById(countryId)
+                .switchIfEmpty(Mono.empty())
+                .flatMap(old -> {
+                    newCountry.setId(old.getId());
+                    newCountry.setCreated(old.getCreated());
+                    newCountry.setUpdated(LocalDateTime.now());
+                    newCountry.setStatus(old.getStatus());
+                    return countryRepository.save(newCountry);
+                });
+    }
 }
