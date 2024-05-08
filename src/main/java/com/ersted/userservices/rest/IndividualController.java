@@ -3,10 +3,8 @@ package com.ersted.userservices.rest;
 import com.ersted.userservices.service.IndividualService;
 import lombok.RequiredArgsConstructor;
 import net.ersted.dto.IndividualDto;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -18,5 +16,10 @@ public class IndividualController {
     @PostMapping
     public Mono<?> registration(@RequestBody IndividualDto dto) {
         return individualService.registration(dto);
+    }
+
+    @GetMapping
+    public Flux<?> findAll() {
+        return individualService.findAllWithTransient();
     }
 }
