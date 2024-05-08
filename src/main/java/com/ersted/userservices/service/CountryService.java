@@ -32,7 +32,7 @@ public class CountryService {
     }
 
     public Mono<Country> update(Country newCountry, Integer countryId) {
-        if (Objects.isNull(newCountry) && Objects.isNull(countryId)) {
+        if (Objects.isNull(newCountry) || Objects.isNull(countryId)) {
             return Mono.empty();
         }
         return countryRepository.findById(countryId)
