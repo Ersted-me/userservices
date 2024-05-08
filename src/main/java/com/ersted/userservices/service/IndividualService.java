@@ -3,6 +3,7 @@ package com.ersted.userservices.service;
 import com.ersted.userservices.entity.Individual;
 import com.ersted.userservices.enums.ResponseStatus;
 import com.ersted.userservices.exception.BadRequestException;
+import com.ersted.userservices.exception.NotFoundException;
 import com.ersted.userservices.mapper.IndividualMapper;
 import com.ersted.userservices.repository.IndividualRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +61,13 @@ public class IndividualService {
 
     public Flux<IndividualDto> findAllWithTransient() {
         return individualRepository.findAll()
+                .flatMap(this::loadTransient)
+                .map(individualMapper::map);
+    }
+
+    public Mono<IndividualDto> findByIdWithTransient(UUID id){
+        return individualRepository.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException("NOT_FOUND", "Individual not found")))
                 .flatMap(this::loadTransient)
                 .map(individualMapper::map);
     }

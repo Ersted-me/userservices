@@ -1,5 +1,6 @@
 package com.ersted.userservices.rest;
 
+import com.ersted.userservices.exception.NotFoundException;
 import com.ersted.userservices.service.IndividualService;
 import com.ersted.userservices.utils.IndividualDataUtils;
 import com.ersted.userservices.utils.ResponseDataUtils;
@@ -17,6 +18,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -80,5 +83,41 @@ class IndividualControllerTest {
         //then
         response.expectStatus().isOk()
                 .expectBodyList(IndividualDto.class).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("find by id functionality")
+    void givenIndividualDto_whenFindById_thenIndividualDtoIsReturned() {
+        //given
+        IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();
+        individualDto.setId("57dfe828-1e15-4501-b891-dda4f19e657a");
+        BDDMockito.given(individualService.findByIdWithTransient(any(UUID.class)))
+                .willReturn(Mono.just(individualDto));
+        //when
+        WebTestClient.ResponseSpec response = webTestClient.get()
+                .uri("/api/v1/individuals/%s".formatted(individualDto.getId()))
+                .exchange();
+        //then
+        response.expectStatus().isOk()
+                .expectBodyList(IndividualDto.class).hasSize(1).contains(individualDto);
+    }
+
+    @Test
+    @DisplayName("find by id non exist individual functionality")
+    void givenNonExistIndividualDto_whenFindById_thenExceptionDtoIsReturned() {
+        //given
+        IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();
+        individualDto.setId("57dfe828-1e15-4501-b891-dda4f19e657a");
+        BDDMockito.given(individualService.findByIdWithTransient(any(UUID.class)))
+                .willReturn(Mono.error(new NotFoundException("NOT_FOUND", "Individual not found")));
+        //when
+        WebTestClient.ResponseSpec response = webTestClient.get()
+                .uri("/api/v1/individuals/%s".formatted(individualDto.getId()))
+                .exchange();
+        //then
+        response.expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("NOT_FOUND")
+                .jsonPath("$.message").isEqualTo("Individual not found");
     }
 }

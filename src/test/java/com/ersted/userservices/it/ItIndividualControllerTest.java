@@ -25,8 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -116,5 +114,49 @@ public class ItIndividualControllerTest {
         //then
         response.expectStatus().isOk()
                 .expectBodyList(IndividualDto.class).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("find by id functionality")
+    void givenIndividualDto_whenFindById_thenIndividualDtoIsReturned() {
+        //given
+        Country country = countryRepository.save(CountryDataUtils.transientCountry()).block();
+        Address transientAddress = AddressDataUtils.transientAddress();
+        transientAddress.setCountryId(country.getId());
+        transientAddress.setCountry(country);
+        Address address = addressRepository.save(transientAddress).block();
+        User transientUser = UserDataUtils.transientUser();
+        transientUser.setAddressId(address.getId());
+        transientUser.setAddress(address);
+        User user = userRepository.save(transientUser).block();
+        Individual transientIndividual = IndividualDataUtils.transientIndividual();
+        transientIndividual.setUserId(user.getId());
+        transientIndividual.setUser(user);
+        Individual individual = individualRepository.save(transientIndividual).block();
+        IndividualDto dto = individualMapper.map(individual);
+
+        //when
+        WebTestClient.ResponseSpec response = webTestClient.get()
+                .uri("/api/v1/individuals/%s".formatted(individual.getId()))
+                .exchange();
+        //then
+        response.expectStatus().isOk()
+                .expectBodyList(IndividualDto.class).hasSize(1).contains(dto);
+    }
+
+    @Test
+    @DisplayName("find by id non exist individual functionality")
+    void givenNonExistIndividualDto_whenFindById_thenExceptionDtoIsReturned() {
+        //given
+        UUID uuid = UUID.randomUUID();
+        //when
+        WebTestClient.ResponseSpec response = webTestClient.get()
+                .uri("/api/v1/individuals/%s".formatted(uuid))
+                .exchange();
+        //then
+        response.expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("NOT_FOUND")
+                .jsonPath("$.message").isEqualTo("Individual not found");
     }
 }

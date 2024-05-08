@@ -4,6 +4,7 @@ import com.ersted.userservices.entity.Individual;
 import com.ersted.userservices.entity.User;
 import com.ersted.userservices.enums.ResponseStatus;
 import com.ersted.userservices.exception.BadRequestException;
+import com.ersted.userservices.exception.NotFoundException;
 import com.ersted.userservices.mapper.IndividualMapper;
 import com.ersted.userservices.repository.IndividualRepository;
 import com.ersted.userservices.utils.IndividualDataUtils;
@@ -214,6 +215,47 @@ class IndividualServiceTest {
                 .expectNextCount(0)
                 .verifyComplete();
         verify(individualRepository, times(1)).findAll();
+        verify(userService, times(0)).findWithTransient(any(UUID.class));
+        verify(individualMapper, times(0)).map(any(Individual.class));
+    }
+
+    @Test
+    @DisplayName("find by id individual")
+    void givenIndividual_whenFindById_thenIndividualsDtoIsReturned() {
+        //given
+        Individual persistIndividual = IndividualDataUtils.persistIndividual();
+        UUID id = persistIndividual.getId();
+        BDDMockito.given(individualRepository.findById(id))
+                .willReturn(Mono.just(persistIndividual));
+        IndividualDto individualDto = IndividualDataUtils.individualDto();
+        BDDMockito.given(individualMapper.map(persistIndividual))
+                .willReturn(individualDto);
+        //when
+        StepVerifier.create(individualService.findByIdWithTransient(id))
+                //then
+                .expectNextMatches(Objects::nonNull)
+                .verifyComplete();
+        verify(individualRepository, times(1)).findById(any(UUID.class));
+        verify(userService, times(0)).findWithTransient(any(UUID.class));
+        verify(individualMapper, times(1)).map(persistIndividual);
+    }
+
+    @Test
+    @DisplayName("find by id non exist individual")
+    void givenNonExistIndividual_whenFindById_thenMonoEmptyIsReturned() {
+        UUID id = UUID.fromString("57dfe828-1e15-4501-b891-dda4f19e657a");
+        //given
+        BDDMockito.given(individualRepository.findById(id))
+                .willReturn(Mono.empty());
+        //when
+        StepVerifier.create(individualService.findByIdWithTransient(id))
+                //then
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException nf
+                        && "NOT_FOUND".equals(nf.getStatus())
+                        && "Individual not found".equals(nf.getMessage()))
+                .verify();
+
+        verify(individualRepository, times(1)).findById(any(UUID.class));
         verify(userService, times(0)).findWithTransient(any(UUID.class));
         verify(individualMapper, times(0)).map(any(Individual.class));
     }
