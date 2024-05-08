@@ -5,6 +5,7 @@ import com.ersted.userservices.entity.User;
 import net.ersted.dto.UserDto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class UserDataUtils {
     public static User transientUser() {
@@ -27,7 +28,7 @@ public class UserDataUtils {
     public static User persistUser() {
         LocalDateTime currentTime = LocalDateTime.now();
         return User.builder()
-                .id("1ba34cca-2ef6-4a69-9fef-7cc726ccc076")
+                .id(UUID.fromString("1ba34cca-2ef6-4a69-9fef-7cc726ccc076"))
                 .secretKey("secretKey")
                 .created(currentTime)
                 .updated(currentTime)
@@ -57,6 +58,6 @@ public class UserDataUtils {
     }
 
     public static UserDto userDto() {
-        return new UserDto("Bob", "Murey", AddressDataUtils.addressDto());
+        return new UserDto(null,"Bob", "Murey", AddressDataUtils.addressDto());
     }
 }

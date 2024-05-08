@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +34,7 @@ class IndividualControllerTest {
     public void givenIndividualDto_whenRegistration_thenResponseDtoIsReturned() {
         //given
         IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();
-        ResponseDto successResponse = ResponseDataUtils.success("createdId", "Individual has been successfully registered");
+        ResponseDto successResponse = ResponseDataUtils.success("7064f21b-db21-4ef7-acf7-ac68b563b908", "Individual has been successfully registered");
         BDDMockito.given(individualService.registration(any(IndividualDto.class)))
                 .willReturn(Mono.just(successResponse));
         //when
@@ -45,8 +46,39 @@ class IndividualControllerTest {
         //then
         response.expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.id").isEqualTo("createdId")
+                .jsonPath("$.id").isEqualTo("7064f21b-db21-4ef7-acf7-ac68b563b908")
                 .jsonPath("$.message").isEqualTo("Individual has been successfully registered")
                 .jsonPath("$.status").isEqualTo("SUCCESS");
+    }
+
+    @Test
+    @DisplayName("find all functionality")
+    void givenIndividualDtos_whenFindAll_thenIndividualDtosAreReturned() {
+        //given
+        IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();
+        BDDMockito.given(individualService.findAllWithTransient())
+                .willReturn(Flux.just(individualDto));
+        //when
+        WebTestClient.ResponseSpec response = webTestClient.get()
+                .uri("/api/v1/individuals")
+                .exchange();
+        //then
+        response.expectStatus().isOk()
+                .expectBodyList(IndividualDto.class).hasSize(1).contains(individualDto);
+    }
+
+    @Test
+    @DisplayName("find all empty list functionality")
+    void givenNothing_whenFindAll_thenEmptyListIsReturned() {
+        //given
+        BDDMockito.given(individualService.findAllWithTransient())
+                .willReturn(Flux.empty());
+        //when
+        WebTestClient.ResponseSpec response = webTestClient.get()
+                .uri("/api/v1/individuals")
+                .exchange();
+        //then
+        response.expectStatus().isOk()
+                .expectBodyList(IndividualDto.class).hasSize(0);
     }
 }

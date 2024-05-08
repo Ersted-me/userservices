@@ -5,6 +5,7 @@ import com.ersted.userservices.entity.Country;
 import net.ersted.dto.AddressDto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class AddressDataUtils {
     public static Address transientAddress() {
@@ -25,7 +26,7 @@ public class AddressDataUtils {
     public static Address persistAddress() {
         LocalDateTime currentTime = LocalDateTime.now();
         return Address.builder()
-                .id("a8098c1a-f86e-11da-bd1a-00112444be1e")
+                .id(UUID.fromString("a8098c1a-f86e-11da-bd1a-00112444be1e"))
                 .created(currentTime)
                 .updated(currentTime)
                 .countryId(null)
@@ -66,6 +67,6 @@ public class AddressDataUtils {
     }
 
     public static AddressDto addressDto() {
-        return new AddressDto("Lenina street", "123456", "Moscow", "Moscow", CountryDataUtils.countryDto());
+        return new AddressDto(null,"Lenina street", "123456", "Moscow", "Moscow", CountryDataUtils.countryDto());
     }
 }

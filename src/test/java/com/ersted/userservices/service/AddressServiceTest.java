@@ -7,6 +7,7 @@ import com.ersted.userservices.utils.AddressDataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -15,9 +16,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Objects;
+import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -120,9 +121,9 @@ class AddressServiceTest {
     public void givenAddressIdWithTransients_whenFind_thenAddressWithTransientAreReturned() {
         //given
         Address persistAddressWithAssociations = AddressDataUtils.persistAddressWithAssociations();
-        String addressId = persistAddressWithAssociations.getId();
+        UUID addressId = persistAddressWithAssociations.getId();
         Country transientCountry = persistAddressWithAssociations.getCountry();
-        String countryId = transientCountry.getId();
+        Integer countryId = transientCountry.getId();
 
         BDDMockito.given(addressRepository.findById(addressId))
                 .willReturn(Mono.just(persistAddressWithAssociations));
@@ -141,16 +142,17 @@ class AddressServiceTest {
     @Test
     @DisplayName("find by id non exist address")
     public void givenNonExistAddressId_whenFind_thenMonoEmptyIsReturned() {
+        UUID randomUUID = UUID.fromString("7064f21b-db21-4ef7-acf7-ac68b563b908");
         //given
-        BDDMockito.given(addressRepository.findById(anyString()))
+        BDDMockito.given(addressRepository.findById(randomUUID))
                 .willReturn(Mono.empty());
         //when
-        StepVerifier.create(addressService.findWithTransient(anyString()))
+        StepVerifier.create(addressService.findWithTransient(randomUUID))
                 //then
                 .expectNextCount(0)
                 .verifyComplete();
-        verify(addressRepository, times(1)).findById(anyString());
-        verify(countryService, times(0)).find(anyString());
+        verify(addressRepository, times(1)).findById(any(UUID.class));
+        verify(countryService, times(0)).find(anyInt());
     }
 
     @Test
@@ -158,7 +160,7 @@ class AddressServiceTest {
     public void givenAddressId_whenFind_thenAddressIsReturned() {
         //given
         Address persistAddress = AddressDataUtils.persistAddress();
-        String addressId = persistAddress.getId();
+        UUID addressId = persistAddress.getId();
         BDDMockito.given(addressRepository.findById(addressId))
                 .willReturn(Mono.just(persistAddress));
         //when
@@ -166,7 +168,7 @@ class AddressServiceTest {
                 //then
                 .expectNextMatches(address -> Objects.nonNull(address) && !address.isNew() && Objects.isNull(address.getCountry()) && Objects.isNull(address.getCountryId()))
                 .verifyComplete();
-        verify(addressRepository, times(1)).findById(anyString());
-        verify(countryService, times(0)).find(anyString());
+        verify(addressRepository, times(1)).findById(any(UUID.class));
+        verify(countryService, times(0)).find(anyInt());
     }
 }

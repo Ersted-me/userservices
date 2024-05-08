@@ -20,9 +20,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -134,7 +134,7 @@ class IndividualServiceTest {
         StepVerifier.create(individualService.registration(individualDto))
                 //then
                 .expectNextMatches(responseDto -> Objects.nonNull(responseDto.getId())
-                        && Objects.equals(IndividualDataUtils.persistIndividual().getId(), responseDto.getId())
+                        && Objects.equals(IndividualDataUtils.persistIndividual().getId().toString(), responseDto.getId())
                         && "Individual has been successfully registered".equals(responseDto.getMessage())
                         && ResponseStatus.SUCCESS.name().equals(responseDto.getStatus()))
                 .verifyComplete();
@@ -162,7 +162,7 @@ class IndividualServiceTest {
         //given
         Individual persistIndividualWithAssociation = IndividualDataUtils.persistIndividualWithAssociation();
         User user = persistIndividualWithAssociation.getUser();
-        String userId = user.getId();
+        UUID userId = user.getId();
         BDDMockito.given(individualRepository.findAll())
                 .willReturn(Flux.just(persistIndividualWithAssociation));
 
@@ -198,7 +198,7 @@ class IndividualServiceTest {
                 .expectNextMatches(Objects::nonNull)
                 .verifyComplete();
         verify(individualRepository, times(1)).findAll();
-        verify(userService, times(0)).findWithTransient(anyString());
+        verify(userService, times(0)).findWithTransient(any(UUID.class));
         verify(individualMapper, times(1)).map(persistIndividual);
     }
 
@@ -214,7 +214,7 @@ class IndividualServiceTest {
                 .expectNextCount(0)
                 .verifyComplete();
         verify(individualRepository, times(1)).findAll();
-        verify(userService, times(0)).findWithTransient(anyString());
+        verify(userService, times(0)).findWithTransient(any(UUID.class));
         verify(individualMapper, times(0)).map(any(Individual.class));
     }
 }

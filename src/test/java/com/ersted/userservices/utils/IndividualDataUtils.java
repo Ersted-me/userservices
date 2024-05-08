@@ -6,6 +6,7 @@ import net.ersted.dto.IndividualDto;
 import net.ersted.dto.UserDto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class IndividualDataUtils {
     public static Individual transientIndividual() {
@@ -27,7 +28,7 @@ public class IndividualDataUtils {
     public static Individual persistIndividual() {
         LocalDateTime currentTime = LocalDateTime.now();
         return Individual.builder()
-                .id("persistIndividual")
+                .id(UUID.fromString("7064f21b-db21-4ef7-acf7-ac68b563b908"))
                 .created(currentTime)
                 .updated(currentTime)
                 .passportNumber("1234123456")
@@ -60,7 +61,7 @@ public class IndividualDataUtils {
         String phoneNumber = "79998887766";
         String email = "email@mail.ru";
         UserDto user = UserDataUtils.userDto();
-        return new IndividualDto(passportNumber, phoneNumber, email, user);
+        return new IndividualDto(null,passportNumber, phoneNumber, email, user);
     }
 
     public static IndividualDto individualDto() {
@@ -68,6 +69,6 @@ public class IndividualDataUtils {
         String phoneNumber = "79998887766";
         String email = "email@mail.ru";
         UserDto user = null;
-        return new IndividualDto(passportNumber, phoneNumber, email, user);
+        return new IndividualDto(null,passportNumber, phoneNumber, email, user);
     }
 }

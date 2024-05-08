@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -118,9 +119,9 @@ class UserServiceTest {
     void givenUserWithTransient_whenFind_thenUserWithTransientIsReturned() {
         //given
         User persistUserWithAssociations = UserDataUtils.persistUserWithAssociations();
-        String userId = persistUserWithAssociations.getId();
+        UUID userId = persistUserWithAssociations.getId();
         Address address = persistUserWithAssociations.getAddress();
-        String addressId = address.getId();
+        UUID addressId = address.getId();
         BDDMockito.given(userRepository.findById(userId))
                 .willReturn(Mono.just(persistUserWithAssociations));
         BDDMockito.given(addressService.findWithTransient(addressId))
@@ -140,7 +141,7 @@ class UserServiceTest {
     void givenUser_whenFind_thenUserIsReturned() {
         //given
         User persistUser = UserDataUtils.persistUser();
-        String userId = persistUser.getId();
+        UUID userId = persistUser.getId();
         BDDMockito.given(userRepository.findById(userId))
                 .willReturn(Mono.just(persistUser));
         //when
@@ -149,21 +150,22 @@ class UserServiceTest {
                 .expectNextMatches(user -> Objects.nonNull(user) && !user.isNew() && Objects.isNull(user.getAddress()))
                 .verifyComplete();
         verify(userRepository, times(1)).findById(userId);
-        verify(addressService, times(0)).findWithTransient(anyString());
+        verify(addressService, times(0)).findWithTransient(any(UUID.class));
     }
 
     @Test
     @DisplayName("find by id non exist user")
     void givenNonExistUser_whenFind_thenMonoEmptyIsReturned() {
+        UUID randomUUID = UUID.fromString("7064f21b-db21-4ef7-acf7-ac68b563b908");
         //given
-        BDDMockito.given(userRepository.findById(anyString()))
+        BDDMockito.given(userRepository.findById(randomUUID))
                 .willReturn(Mono.empty());
         //when
-        StepVerifier.create(userService.findWithTransient(anyString()))
+        StepVerifier.create(userService.findWithTransient(randomUUID))
         //then
                 .expectNextCount(0)
                 .verifyComplete();
-        verify(userRepository, times(1)).findById(anyString());
-        verify(addressService, times(0)).findWithTransient(anyString());
+        verify(userRepository, times(1)).findById(any(UUID.class));
+        verify(addressService, times(0)).findWithTransient(any(UUID.class));
     }
 }

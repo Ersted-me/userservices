@@ -15,8 +15,7 @@ import reactor.test.StepVerifier;
 
 import java.util.Objects;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -75,7 +74,7 @@ class CountryServiceTest {
     @DisplayName("find by id exist country functionality")
     void givenExistCountryId_whenFind_thenCountryIsReturned() {
         //given
-        String existCountryId = CountryDataUtils.persistCountry().getId();
+        Integer existCountryId = CountryDataUtils.persistCountry().getId();
         BDDMockito.given(countryRepository.findById(existCountryId))
                 .willReturn(Mono.just(CountryDataUtils.persistCountry()));
         //when
@@ -90,13 +89,13 @@ class CountryServiceTest {
     @DisplayName("find by id non exist country functionality")
     void givenNonExistCountryId_whenFind_thenMonoEmptyIsReturned() {
         //given
-        BDDMockito.given(countryRepository.findById(anyString()))
+        BDDMockito.given(countryRepository.findById(anyInt()))
                 .willReturn(Mono.empty());
         //when
-        StepVerifier.create(countryService.find(anyString()))
+        StepVerifier.create(countryService.find(anyInt()))
                 //then
                 .expectNextCount(0)
                 .verifyComplete();
-        verify(countryRepository, times(1)).findById(anyString());
+        verify(countryRepository, times(1)).findById(anyInt());
     }
 }
