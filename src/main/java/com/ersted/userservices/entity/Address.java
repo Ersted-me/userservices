@@ -5,22 +5,23 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
-import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Table("person.addresses")
-public class Address implements Persistable<String> {
+public class Address implements Persistable<UUID> {
     @Id
-    private String id;
+    private UUID id;
     private LocalDateTime created;
     private LocalDateTime updated;
-    private String countryId;
+    private Integer countryId;
     private String address;
     private String zipCode;
     private LocalDateTime archived;
@@ -35,6 +36,6 @@ public class Address implements Persistable<String> {
 
     @Override
     public boolean isNew() {
-        return !StringUtils.hasText(id);
+        return Objects.isNull(id);
     }
 }

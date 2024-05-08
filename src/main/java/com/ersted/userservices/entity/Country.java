@@ -8,16 +8,17 @@ import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table("countries")
-public class Country implements Persistable<String> {
+@Table("person.countries")
+public class Country implements Persistable<Integer> {
     @Id
-    private String id;
+    private Integer id;
     private LocalDateTime created;
     private LocalDateTime updated;
     private String name;
@@ -31,6 +32,6 @@ public class Country implements Persistable<String> {
 
     @Override
     public boolean isNew() {
-        return !StringUtils.hasText(id);
+        return Objects.isNull(id);
     }
 }

@@ -27,7 +27,7 @@ public class CountryService {
         return countryRepository.save(transientCountry);
     }
 
-    public Mono<Country> find(String countryId){
+    public Mono<Country> find(Integer countryId) {
         return countryRepository.findById(countryId);
     }
 }

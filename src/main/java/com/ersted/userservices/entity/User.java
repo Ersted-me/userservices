@@ -8,16 +8,18 @@ import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Table("person.users")
-public class User implements Persistable<String> {
+public class User implements Persistable<UUID> {
     @Id
-    private String id;
+    private UUID id;
     private String secretKey;
     private LocalDateTime created;
     private LocalDateTime updated;
@@ -27,7 +29,7 @@ public class User implements Persistable<String> {
     private LocalDateTime archivedAt;
     private String status;
     private Boolean filled;
-    private String addressId;
+    private UUID addressId;
 
     @Transient
     private Address address;
@@ -37,6 +39,6 @@ public class User implements Persistable<String> {
 
     @Override
     public boolean isNew() {
-        return !StringUtils.hasText(id);
+        return Objects.isNull(id);
     }
 }

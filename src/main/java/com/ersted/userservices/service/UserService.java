@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class UserService {
         return userRepository.save(transientUser);
     }
 
-    public Mono<User> findWithTransient(String userId) {
+    public Mono<User> findWithTransient(UUID userId) {
         return userRepository.findById(userId)
                 .flatMap(user -> {
                     if (Objects.isNull(user.getAddressId())) {

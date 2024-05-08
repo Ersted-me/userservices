@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +44,7 @@ public class AddressService {
         return addressRepository.save(transientAddress);
     }
 
-    public Mono<Address> findWithTransient(String addressId) {
+    public Mono<Address> findWithTransient(UUID addressId) {
         return addressRepository.findById(addressId)
                 .flatMap(address -> {
                     if (Objects.isNull(address.getCountryId())) {
