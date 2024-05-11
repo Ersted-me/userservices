@@ -57,4 +57,36 @@ public class UserService {
                             });
                 });
     }
+
+    public Mono<User> update(User user, UUID oldUserId) {
+        if (Objects.isNull(user) || Objects.isNull(oldUserId)) {
+            return Mono.empty();
+        }
+        Mono<User> userMono = userRepository.findById(oldUserId);
+        if (Objects.nonNull(user.getAddress())) {
+            return userMono.flatMap(oldUser -> {
+                        if (Objects.isNull(oldUser.getAddressId())) {
+                            return addressService.save(user.getAddress())
+                                    .map(savedAddress -> {
+                                        user.setAddress(savedAddress);
+                                        user.setAddressId(savedAddress.getId());
+                                        return oldUser;
+                                    });
+                        }
+                        return addressService.update(user.getAddress(), oldUser.getAddressId())
+                                .map(updatedAddress -> oldUser);
+                    })
+                    .flatMap(oldUser -> userRepository.save(setRequiredFieldsForUpdate(user, oldUser)));
+        }
+        return userMono.flatMap(oldUser -> userRepository.save(setRequiredFieldsForUpdate(user, oldUser)));
+    }
+
+    private User setRequiredFieldsForUpdate(final User user, final User oldUser) {
+        user.setId(oldUser.getId());
+        user.setUpdated(LocalDateTime.now());
+        user.setCreated(oldUser.getCreated());
+        user.setArchivedAt(oldUser.getArchivedAt());
+        user.setVerifiedAt(oldUser.getVerifiedAt());
+        return user;
+    }
 }

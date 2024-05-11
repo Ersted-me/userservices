@@ -14,13 +14,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -162,10 +161,132 @@ class UserServiceTest {
                 .willReturn(Mono.empty());
         //when
         StepVerifier.create(userService.findWithTransient(randomUUID))
-        //then
+                //then
                 .expectNextCount(0)
                 .verifyComplete();
         verify(userRepository, times(1)).findById(any(UUID.class));
         verify(addressService, times(0)).findWithTransient(any(UUID.class));
+    }
+
+    @Test
+    @DisplayName("update user")
+    public void givenUser_whenUpdate_thenUserIsReturned() {
+        //given
+        User oldUser = UserDataUtils.persistUser();
+        User userToUpdate = UserDataUtils.persistUser();
+        userToUpdate.setFirstName("new name");
+
+        BDDMockito.given(userRepository.findById(oldUser.getId()))
+                .willReturn(Mono.just(oldUser));
+        BDDMockito.given(userRepository.save(userToUpdate))
+                .willReturn(Mono.just(userToUpdate));
+        //when
+        StepVerifier.create(userService.update(userToUpdate, oldUser.getId()))
+                //then
+                .expectNextMatches(user -> !user.isNew() && "new name".equals(user.getFirstName()))
+                .verifyComplete();
+        verify(userRepository, times(1)).findById(oldUser.getId());
+        verify(userRepository, times(1)).save(userToUpdate);
+    }
+
+    @Test
+    @DisplayName("update null user or null id")
+    public void givenNothing_whenUpdate_thenMonoEmptyIsReturned() {
+        //given
+        //when
+        StepVerifier.create(userService.update(null, null))
+                //then
+                .expectNextCount(0)
+                .verifyComplete();
+        verify(userRepository, times(0)).findById(any(UUID.class));
+        verify(userRepository, times(0)).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("update user setters calling check")
+    public void givenUser_whenUpdate_thenSettersIsCalled() {
+        //given
+        User oldUser = UserDataUtils.persistUser();
+        User userToUpdate = mock(User.class);
+
+        BDDMockito.given(userRepository.findById(oldUser.getId()))
+                .willReturn(Mono.just(oldUser));
+        BDDMockito.given(userRepository.save(userToUpdate))
+                .willReturn(Mono.just(userToUpdate));
+        //when
+        StepVerifier.create(userService.update(userToUpdate, oldUser.getId()))
+                //then
+                .expectNextCount(1)
+                .verifyComplete();
+        verify(userToUpdate, times(1)).setId(oldUser.getId());
+        verify(userToUpdate, times(1)).setUpdated(any(LocalDateTime.class));
+        verify(userToUpdate, times(1)).setCreated(oldUser.getCreated());
+        verify(userToUpdate, times(1)).setArchivedAt(oldUser.getArchivedAt());
+        verify(userToUpdate, times(1)).setVerifiedAt(oldUser.getVerifiedAt());
+    }
+
+    @Test
+    @DisplayName("update user with associations")
+    public void givenUserWithAssociation_whenUpdate_thenUserAndAssociationAreUpdated() {
+        //given
+        User oldUser = UserDataUtils.persistUserWithAssociations();
+
+        User userToUpdate = UserDataUtils.transientUserWithAssociations();
+        userToUpdate.setFirstName("new name");
+
+        User updatedUser = UserDataUtils.persistUserWithAssociations();
+        updatedUser.setFirstName("new name");
+
+        BDDMockito.given(userRepository.findById(oldUser.getId()))
+                .willReturn(Mono.just(oldUser));
+
+        BDDMockito.given(userRepository.save(userToUpdate))
+                .willReturn(Mono.just(updatedUser));
+
+        BDDMockito.given(addressService.update(userToUpdate.getAddress(), oldUser.getAddressId()))
+                .willReturn(Mono.just(userToUpdate.getAddress()));
+        //when
+        StepVerifier.create(userService.update(userToUpdate, oldUser.getId()))
+                //then
+                .expectNextMatches(user -> !user.isNew() && "new name".equals(user.getFirstName()))
+                .verifyComplete();
+        verify(userRepository, times(1)).findById(oldUser.getId());
+        verify(userRepository, times(1)).save(userToUpdate);
+        verify(addressService, times(1)).update(userToUpdate.getAddress(), oldUser.getAddressId());
+    }
+
+    @Test
+    @DisplayName("update user and save associations")
+    public void givenUser_whenUpdate_thenUserUpdatedAndSaveAssociation() {
+        //given
+        User oldUser = UserDataUtils.persistUser();
+        User userToUpdate = mock(User.class);
+
+        User updatedUser = UserDataUtils.persistUserWithAssociations();
+
+        BDDMockito.given(userRepository.findById(oldUser.getId()))
+                .willReturn(Mono.just(oldUser));
+
+        BDDMockito.given(userRepository.save(userToUpdate))
+                .willReturn(Mono.just(updatedUser));
+
+        BDDMockito.given(userToUpdate.getAddress())
+                .willReturn(UserDataUtils.transientUserWithAssociations().getAddress());
+
+        BDDMockito.given(addressService.save(userToUpdate.getAddress()))
+                .willReturn(Mono.just(updatedUser.getAddress()));
+
+        //when
+        StepVerifier.create(userService.update(userToUpdate, oldUser.getId()))
+                //then
+                .expectNextCount(1)
+                .verifyComplete();
+        verify(userToUpdate, times(1)).setId(oldUser.getId());
+        verify(userToUpdate, times(1)).setUpdated(any(LocalDateTime.class));
+        verify(userToUpdate, times(1)).setCreated(oldUser.getCreated());
+        verify(userToUpdate, times(1)).setArchivedAt(oldUser.getArchivedAt());
+        verify(userToUpdate, times(1)).setVerifiedAt(oldUser.getVerifiedAt());
+        verify(userToUpdate, times(1)).setAddress(updatedUser.getAddress());
+        verify(userToUpdate, times(1)).setAddressId(updatedUser.getAddress().getId());
     }
 }
