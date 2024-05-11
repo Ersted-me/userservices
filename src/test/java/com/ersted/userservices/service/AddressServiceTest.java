@@ -7,7 +7,6 @@ import com.ersted.userservices.utils.AddressDataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -15,12 +14,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AddressServiceTest {
@@ -170,5 +169,125 @@ class AddressServiceTest {
                 .verifyComplete();
         verify(addressRepository, times(1)).findById(any(UUID.class));
         verify(countryService, times(0)).find(anyInt());
+    }
+
+    @Test
+    @DisplayName("update null address or empty oldAddressId")
+    void givenNothing_whenUpdate_thenMonoIsReturned() {
+        //given
+        //when
+        StepVerifier.create(addressService.update(null,null))
+        //then
+                .expectNextCount(0)
+                .verifyComplete();
+        verify(addressRepository, times(0)).findById(any(UUID.class));
+        verify(addressRepository, times(0)).save(any(Address.class));
+    }
+
+    @Test
+    @DisplayName("update address")
+    void givenAddress_whenUpdate_thenUpdatedAddressIsReturned() {
+        //given
+        Address oldAddress = AddressDataUtils.persistAddress();
+        Address toUpdateAddress = AddressDataUtils.persistAddress();
+        toUpdateAddress.setAddress("new address");
+
+        assert oldAddress.getId() != null;
+        BDDMockito.given(addressRepository.findById(oldAddress.getId()))
+                        .willReturn(Mono.just(oldAddress));
+        BDDMockito.given(addressRepository.save(toUpdateAddress))
+                        .willReturn(Mono.just(toUpdateAddress));
+        //when
+        StepVerifier.create(addressService.update(toUpdateAddress,oldAddress.getId()))
+                //then
+                .expectNextMatches(address -> !address.isNew() && "new address".equals(address.getAddress()))
+                .verifyComplete();
+        verify(addressRepository, times(1)).findById(any(UUID.class));
+        verify(addressRepository, times(1)).save(any(Address.class));
+        verify(countryService, times(0)).update(any(Country.class), anyInt());
+    }
+
+    @Test
+    @DisplayName("update address setters calling check")
+    void givenAddress_whenUpdate_thenSettersAreCalled() {
+        //given
+        Address oldAddress = AddressDataUtils.persistAddress();
+        Address toUpdateAddress = mock(Address.class);
+
+        assert oldAddress.getId() != null;
+        BDDMockito.given(addressRepository.findById(oldAddress.getId()))
+                .willReturn(Mono.just(oldAddress));
+        BDDMockito.given(addressRepository.save(any(Address.class)))
+                .willReturn(Mono.just(toUpdateAddress));
+        //when
+        StepVerifier.create(addressService.update(toUpdateAddress, oldAddress.getId()))
+              //then
+                .expectNextCount(1)
+                .verifyComplete();
+
+        verify(toUpdateAddress, times(1)).setId(oldAddress.getId());
+        verify(toUpdateAddress, times(1)).setUpdated(any(LocalDateTime.class));
+        verify(toUpdateAddress, times(1)).setCreated(oldAddress.getUpdated());
+        verify(toUpdateAddress, times(1)).setArchived(oldAddress.getArchived());
+    }
+
+    @Test
+    @DisplayName("update address with transients")
+    void givenAddressWithTransients_whenUpdate_thenAddressAndTransientsAreUpdated() {
+        //given
+        Address oldAddress = AddressDataUtils.persistAddressWithAssociations();
+        UUID oldAddressId = oldAddress.getId();
+        Address toUpdateAddress = AddressDataUtils.persistAddressWithAssociations();
+        toUpdateAddress.setAddress("new address");
+
+        Country countryToUpdate = toUpdateAddress.getCountry();
+        Integer countryId = toUpdateAddress.getCountryId();
+
+        BDDMockito.given(addressRepository.findById(oldAddressId))
+                .willReturn(Mono.just(oldAddress));
+        BDDMockito.given(addressRepository.save(toUpdateAddress))
+                .willReturn(Mono.just(toUpdateAddress));
+
+        BDDMockito.given(countryService.update(countryToUpdate, countryId))
+                        .willReturn(Mono.just(countryToUpdate));
+        //when
+        StepVerifier.create(addressService.update(toUpdateAddress, oldAddress.getId()))
+                //then
+                .expectNextCount(1)
+                .verifyComplete();
+
+        verify(addressRepository, times(1)).findById(any(UUID.class));
+        verify(addressRepository, times(1)).save(toUpdateAddress);
+        verify(countryService, times(1)).update(countryToUpdate, countryId);
+    }
+
+    @Test
+    @DisplayName("update address with transients")
+    void givenAddressWithNewTransients_whenUpdate_thenAddressUpdatedTransientSaved() {
+        //given
+        Address oldAddress = AddressDataUtils.persistAddress();
+        UUID oldAddressId = oldAddress.getId();
+        Address toUpdateAddress = AddressDataUtils.persistAddressWithAssociations();
+        toUpdateAddress.setAddress("new address");
+
+        Country countryToUpdate = toUpdateAddress.getCountry();
+
+        assert oldAddressId != null;
+        BDDMockito.given(addressRepository.findById(oldAddressId))
+                .willReturn(Mono.just(oldAddress));
+        BDDMockito.given(addressRepository.save(toUpdateAddress))
+                .willReturn(Mono.just(toUpdateAddress));
+
+        BDDMockito.given(countryService.save(countryToUpdate))
+                .willReturn(Mono.just(countryToUpdate));
+        //when
+        StepVerifier.create(addressService.update(toUpdateAddress, oldAddress.getId()))
+                //then
+                .expectNextCount(1)
+                .verifyComplete();
+
+        verify(addressRepository, times(1)).findById(any(UUID.class));
+        verify(addressRepository, times(1)).save(toUpdateAddress);
+        verify(countryService, times(1)).save(countryToUpdate);
     }
 }

@@ -59,4 +59,35 @@ public class AddressService {
                             });
                 });
     }
+
+    public Mono<Address> update(Address address, UUID oldAddressId) {
+        if (Objects.isNull(address) || Objects.isNull(oldAddressId)) {
+            return Mono.empty();
+        }
+        Mono<Address> addressMono = addressRepository.findById(oldAddressId);
+        if (Objects.nonNull(address.getCountry())) {
+            return addressMono
+                    .flatMap(oldAddress -> {
+                        if (Objects.isNull(oldAddress.getCountryId())) {
+                            return countryService.save(address.getCountry()).map(savedCountry -> {
+                                oldAddress.setCountry(savedCountry);
+                                oldAddress.setCountryId(savedCountry.getId());
+                                return oldAddress;
+                            });
+                        }
+                        return countryService.update(address.getCountry(), oldAddress.getCountryId())
+                                .map(updatedCountry -> oldAddress);
+                    })
+                    .flatMap(oldAddress -> addressRepository.save(setRequiredFieldsForUpdate(address, oldAddress)));
+        }
+        return addressMono.flatMap(oldAddress -> addressRepository.save(setRequiredFieldsForUpdate(address, oldAddress)));
+    }
+
+    private Address setRequiredFieldsForUpdate(final Address address, final Address oldAddress) {
+        address.setId(oldAddress.getId());
+        address.setCreated(oldAddress.getCreated());
+        address.setUpdated(LocalDateTime.now());
+        address.setArchived(oldAddress.getArchived());
+        return address;
+    }
 }
