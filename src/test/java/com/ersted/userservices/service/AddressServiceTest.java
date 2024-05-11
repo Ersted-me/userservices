@@ -4,6 +4,7 @@ import com.ersted.userservices.entity.Address;
 import com.ersted.userservices.entity.Country;
 import com.ersted.userservices.repository.AddressRepository;
 import com.ersted.userservices.utils.AddressDataUtils;
+import com.ersted.userservices.utils.CountryDataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -290,4 +291,38 @@ class AddressServiceTest {
         verify(addressRepository, times(1)).save(toUpdateAddress);
         verify(countryService, times(1)).save(countryToUpdate);
     }
+
+    @Test
+    @DisplayName("update address with transient setters calling check")
+    void givenAddressWithTransient_whenUpdate_thenSettersAreCalled() {
+        //given
+        Address oldAddress = AddressDataUtils.persistAddress();
+        Address toUpdateAddress = mock(Address.class);
+        Country transientCountry = CountryDataUtils.transientCountry();
+        Country persistCountry = CountryDataUtils.persistCountry();
+
+        assert oldAddress.getId() != null;
+        BDDMockito.given(addressRepository.findById(oldAddress.getId()))
+                .willReturn(Mono.just(oldAddress));
+        BDDMockito.given(addressRepository.save(any(Address.class)))
+                .willReturn(Mono.just(toUpdateAddress));
+        BDDMockito.given(toUpdateAddress.getCountry())
+                        .willReturn(transientCountry);
+        BDDMockito.given(countryService.save(transientCountry))
+                .willReturn(Mono.just(persistCountry));
+        //when
+        StepVerifier.create(addressService.update(toUpdateAddress, oldAddress.getId()))
+                //then
+                .expectNextCount(1)
+                .verifyComplete();
+
+        verify(toUpdateAddress, times(1)).setId(oldAddress.getId());
+        verify(toUpdateAddress, times(1)).setUpdated(any(LocalDateTime.class));
+        verify(toUpdateAddress, times(1)).setCreated(oldAddress.getUpdated());
+        verify(toUpdateAddress, times(1)).setArchived(oldAddress.getArchived());
+        verify(toUpdateAddress, times(1)).setCountry(persistCountry);
+        verify(toUpdateAddress, times(1)).setCountryId(persistCountry.getId());
+        verify(countryService, times(1)).save(transientCountry);
+    }
+
 }

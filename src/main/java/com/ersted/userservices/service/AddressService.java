@@ -70,8 +70,8 @@ public class AddressService {
                     .flatMap(oldAddress -> {
                         if (Objects.isNull(oldAddress.getCountryId())) {
                             return countryService.save(address.getCountry()).map(savedCountry -> {
-                                oldAddress.setCountry(savedCountry);
-                                oldAddress.setCountryId(savedCountry.getId());
+                                address.setCountry(savedCountry);
+                                address.setCountryId(savedCountry.getId());
                                 return oldAddress;
                             });
                         }
