@@ -6,6 +6,7 @@ import com.ersted.userservices.exception.BadRequestException;
 import com.ersted.userservices.exception.NotFoundException;
 import com.ersted.userservices.mapper.IndividualMapper;
 import com.ersted.userservices.repository.IndividualRepository;
+import com.ersted.userservices.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import net.ersted.dto.IndividualDto;
 import net.ersted.dto.ResponseDto;
@@ -23,6 +24,7 @@ public class IndividualService {
     private final IndividualRepository individualRepository;
     private final IndividualMapper individualMapper;
     private final UserService userService;
+    private final ProfileHistoryService profileHistoryService;
 
     public Mono<Individual> save(Individual transientIndividual) {
         if (Objects.isNull(transientIndividual)) {
@@ -65,7 +67,7 @@ public class IndividualService {
                 .map(individualMapper::map);
     }
 
-    public Mono<IndividualDto> findByIdWithTransient(UUID id){
+    public Mono<IndividualDto> findByIdWithTransient(UUID id) {
         return individualRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException("NOT_FOUND", "Individual not found")))
                 .flatMap(this::loadTransient)
@@ -86,5 +88,37 @@ public class IndividualService {
                     }
                     return individual;
                 });
+    }
+
+    public Mono<IndividualDto> update(IndividualDto dto, UUID oldIndividualId) {
+        Individual newIndividual = individualMapper.map(dto);
+        return update(newIndividual, oldIndividualId)
+                .map(individualMapper::map);
+    }
+
+    public Mono<Individual> update(Individual individual, UUID oldIndividualId) {
+        if (Objects.isNull(individual) || Objects.isNull(oldIndividualId)) {
+            return Mono.empty();
+        }
+        return individualRepository.findById(oldIndividualId)
+                .flatMap(this::loadTransient)
+                .flatMap(oldIndividual -> profileHistoryService.save(oldIndividual.getUserId(), "", "", "", JsonUtils.diffJsonLikeString(individual, oldIndividual))
+                        .map(history -> oldIndividual))
+                .flatMap(oldIndividual -> userService.update(individual.getUser(), oldIndividual.getUserId())
+                        .map(updatedUser -> {
+                            individual.setUser(updatedUser);
+                            individual.setUserId(updatedUser.getId());
+                            return oldIndividual;
+                        }))
+                .flatMap(oldIndividual -> individualRepository.save(setRequiredFieldsForUpdate(individual, oldIndividual)));
+    }
+
+    private Individual setRequiredFieldsForUpdate(final Individual individual, final Individual oldIndividual) {
+        individual.setId(oldIndividual.getId());
+        individual.setUpdated(LocalDateTime.now());
+        individual.setCreated(oldIndividual.getCreated());
+        individual.setArchivedAt(oldIndividual.getArchivedAt());
+        individual.setVerifiedAt(oldIndividual.getVerifiedAt());
+        return individual;
     }
 }
