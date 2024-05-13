@@ -101,7 +101,7 @@ CREATE TABLE person.profile_history
     profile_type   VARCHAR(32),
     reason         VARCHAR(255),
     comment        VARCHAR(255),
-    changed_values VARCHAR(1024)
+    changed_values JSONB
 );
 
 CREATE TABLE person.merchant_members_invitations

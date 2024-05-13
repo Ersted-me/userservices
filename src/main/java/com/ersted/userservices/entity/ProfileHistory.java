@@ -1,5 +1,7 @@
 package com.ersted.userservices.entity;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import io.r2dbc.postgresql.codec.Json;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +28,8 @@ public class ProfileHistory implements Persistable<UUID> {
     private String profileType;
     private String reason;
     private String comment;
-    private String changedValues;
+
+    private Json changedValues;
 
     @Transient
     private User user;

@@ -2,10 +2,12 @@ package com.ersted.userservices.service;
 
 import com.ersted.userservices.entity.ProfileHistory;
 import com.ersted.userservices.repository.ProfileHistoryRepository;
+import io.r2dbc.postgresql.codec.Json;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -23,7 +25,8 @@ public class ProfileHistoryService {
                 .profileType(profileType)
                 .reason(reason)
                 .comment(comment)
-                .changedValues(changedValues)
+                .changedValues(Json.of(changedValues))
+                .created(LocalDateTime.now())
                 .build());
     }
 }
