@@ -6,12 +6,12 @@ import net.ersted.dto.CountryDto;
 import java.time.LocalDateTime;
 
 public class CountryDataUtils {
+    private final static LocalDateTime LOCAL_DATE_TIME = LocalDateTime.now();
     public static Country transientCountry(){
-        LocalDateTime currentTime = LocalDateTime.now();
         return Country.builder()
                 .id(null)
-                .created(currentTime)
-                .updated(currentTime)
+                .created(LOCAL_DATE_TIME)
+                .updated(LOCAL_DATE_TIME)
                 .name("Russia")
                 .alpha2("Ru")
                 .alpha3("Rus")
@@ -19,11 +19,10 @@ public class CountryDataUtils {
                 .build();
     }
     public static Country persistCountry(){
-        LocalDateTime currentTime = LocalDateTime.now();
         return Country.builder()
                 .id(1)
-                .created(currentTime)
-                .updated(currentTime)
+                .created(LOCAL_DATE_TIME)
+                .updated(LOCAL_DATE_TIME)
                 .name("Russia")
                 .alpha2("Ru")
                 .alpha3("Rus")

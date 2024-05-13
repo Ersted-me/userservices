@@ -8,31 +8,30 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class AddressDataUtils {
+    private final static LocalDateTime LOCAL_DATE_TIME = LocalDateTime.now();
     public static Address transientAddress() {
-        LocalDateTime currentTime = LocalDateTime.now();
         return Address.builder()
                 .id(null)
-                .created(currentTime)
-                .updated(currentTime)
+                .created(LOCAL_DATE_TIME)
+                .updated(LOCAL_DATE_TIME)
                 .countryId(null)
                 .address("Aleksandrovskoe 1")
                 .zipCode("636761")
-                .archived(currentTime)
+                .archived(LOCAL_DATE_TIME)
                 .city("Aleksandrovskoe 1")
                 .state("Tomskaya Oblast")
                 .build();
     }
 
     public static Address persistAddress() {
-        LocalDateTime currentTime = LocalDateTime.now();
         return Address.builder()
                 .id(UUID.fromString("a8098c1a-f86e-11da-bd1a-00112444be1e"))
-                .created(currentTime)
-                .updated(currentTime)
+                .created(LOCAL_DATE_TIME)
+                .updated(LOCAL_DATE_TIME)
                 .countryId(null)
                 .address("Aleksandrovskoe 1")
                 .zipCode("636761")
-                .archived(currentTime)
+                .archived(LOCAL_DATE_TIME)
                 .city("Aleksandrovskoe 1")
                 .state("Tomskaya Oblast")
                 .build();

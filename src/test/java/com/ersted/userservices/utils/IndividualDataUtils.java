@@ -9,33 +9,32 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class IndividualDataUtils {
+    private final static LocalDateTime LOCAL_DATE_TIME = LocalDateTime.now();
     public static Individual transientIndividual() {
-        LocalDateTime currentTime = LocalDateTime.now();
         return Individual.builder()
                 .id(null)
-                .created(currentTime)
-                .updated(currentTime)
+                .created(LOCAL_DATE_TIME)
+                .updated(LOCAL_DATE_TIME)
                 .passportNumber("1234123456")
                 .phoneNumber("79998887766")
                 .email("email@mail.ru")
-                .verifiedAt(currentTime)
-                .archivedAt(currentTime)
+                .verifiedAt(LOCAL_DATE_TIME)
+                .archivedAt(LOCAL_DATE_TIME)
                 .status(null)
                 .userId(null)
                 .build();
     }
 
     public static Individual persistIndividual() {
-        LocalDateTime currentTime = LocalDateTime.now();
         return Individual.builder()
                 .id(UUID.fromString("7064f21b-db21-4ef7-acf7-ac68b563b908"))
-                .created(currentTime)
-                .updated(currentTime)
+                .created(LOCAL_DATE_TIME)
+                .updated(LOCAL_DATE_TIME)
                 .passportNumber("1234123456")
                 .phoneNumber("79998887766")
                 .email("email@mail.ru")
-                .verifiedAt(currentTime)
-                .archivedAt(currentTime)
+                .verifiedAt(LOCAL_DATE_TIME)
+                .archivedAt(LOCAL_DATE_TIME)
                 .status(null)
                 .userId(null)
                 .build();

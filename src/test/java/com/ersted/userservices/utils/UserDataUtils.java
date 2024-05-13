@@ -8,17 +8,17 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class UserDataUtils {
+    private final static LocalDateTime LOCAL_DATE_TIME = LocalDateTime.now();
     public static User transientUser() {
-        LocalDateTime currentTime = LocalDateTime.now();
         return User.builder()
                 .id(null)
                 .secretKey("secretKey")
-                .created(currentTime)
-                .updated(currentTime)
+                .created(LOCAL_DATE_TIME)
+                .updated(LOCAL_DATE_TIME)
                 .firstName("FirstName")
                 .lastName("LastName")
-                .verifiedAt(currentTime)
-                .archivedAt(currentTime)
+                .verifiedAt(LOCAL_DATE_TIME)
+                .archivedAt(LOCAL_DATE_TIME)
                 .status(null)
                 .filled(false)
                 .addressId(null)
@@ -26,16 +26,15 @@ public class UserDataUtils {
     }
 
     public static User persistUser() {
-        LocalDateTime currentTime = LocalDateTime.now();
         return User.builder()
                 .id(UUID.fromString("1ba34cca-2ef6-4a69-9fef-7cc726ccc076"))
                 .secretKey("secretKey")
-                .created(currentTime)
-                .updated(currentTime)
+                .created(LOCAL_DATE_TIME)
+                .updated(LOCAL_DATE_TIME)
                 .firstName("FirstName")
                 .lastName("LastName")
-                .verifiedAt(currentTime)
-                .archivedAt(currentTime)
+                .verifiedAt(LOCAL_DATE_TIME)
+                .archivedAt(LOCAL_DATE_TIME)
                 .status(null)
                 .filled(false)
                 .addressId(null)
