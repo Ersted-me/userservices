@@ -49,7 +49,7 @@ public class IndividualDataUtils {
 
     public static Individual persistIndividualWithAssociation() {
         Individual persistIndividual = IndividualDataUtils.persistIndividual();
-        User persistUser = UserDataUtils.persistUser();
+        User persistUser = UserDataUtils.persistUserWithAssociations();
         persistIndividual.setUser(persistUser);
         persistIndividual.setUserId(persistUser.getId());
         return persistIndividual;

@@ -50,7 +50,7 @@ public class UserDataUtils {
 
     public static User persistUserWithAssociations() {
         User persistUser = UserDataUtils.persistUser();
-        Address persistAddress = AddressDataUtils.persistAddress();
+        Address persistAddress = AddressDataUtils.persistAddressWithAssociations();
         persistUser.setAddressId(persistAddress.getId());
         persistUser.setAddress(persistAddress);
         return persistUser;
