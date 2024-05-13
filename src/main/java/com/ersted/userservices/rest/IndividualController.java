@@ -29,4 +29,9 @@ public class IndividualController {
     public Mono<?> find(@PathVariable("individualId") String individualId) {
         return individualService.findByIdWithTransient(UUID.fromString(individualId));
     }
+
+    @PutMapping("/{individualId:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
+    public Mono<?> update(@PathVariable("individualId") UUID individualId, @RequestBody IndividualDto dto) {
+        return individualService.update(dto, individualId);
+    }
 }
