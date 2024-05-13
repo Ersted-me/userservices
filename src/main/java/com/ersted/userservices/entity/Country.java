@@ -27,6 +27,7 @@ public class Country implements Persistable<Integer> {
 
     @Transient
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Address> addresses;
 
     @Override
