@@ -1,6 +1,7 @@
 package com.ersted.userservices.service;
 
 import com.ersted.userservices.entity.Individual;
+import com.ersted.userservices.entity.Invitation;
 import com.ersted.userservices.enums.ResponseStatus;
 import com.ersted.userservices.exception.BadRequestException;
 import com.ersted.userservices.exception.NotFoundException;
@@ -25,6 +26,7 @@ public class IndividualService {
     private final IndividualMapper individualMapper;
     private final UserService userService;
     private final ProfileHistoryService profileHistoryService;
+    private final InvitationService invitationService;
 
     public Mono<Individual> save(Individual transientIndividual) {
         if (Objects.isNull(transientIndividual)) {
@@ -41,7 +43,7 @@ public class IndividualService {
         transientIndividual.setVerifiedAt(currentDateTime);
 
         if (Objects.isNull(transientIndividual.getUser())) {
-            return individualRepository.save(transientIndividual);
+            return individualRepository.save(transientIndividual); // todo exception profile his
         }
         if (transientIndividual.getUser().isNew()) {
             return userService.save(transientIndividual.getUser())
@@ -54,9 +56,27 @@ public class IndividualService {
         return individualRepository.save(transientIndividual);
     }
 
-    public Mono<ResponseDto> registration(IndividualDto dto) {
+    public Mono<ResponseDto> registrationByInvitation(IndividualDto dto) {
         Individual transientIndividual = individualMapper.map(dto);
         return this.save(transientIndividual)
+                .switchIfEmpty(Mono.error(new BadRequestException("BAD_REQUEST", "Body can not be blank")))
+                .flatMap(individual -> Mono.just(new ResponseDto(ResponseStatus.SUCCESS.name(), "Individual has been successfully registered", individual.getId().toString())));
+    }
+    //todo сделать прикрипление к merchant -> merchantMembersService
+    public Mono<Individual> saveByInvitation(Individual individual, Invitation invitation){
+        individual.getUser().setFirstName(invitation.getFirstName());
+        individual.getUser().setLastName(invitation.getLastName());
+        individual.setEmail(invitation.getEmail());
+        return save(individual);
+    }
+
+    public Mono<ResponseDto> registrationByInvitation(IndividualDto dto, UUID invitationId) {
+        return invitationService.find(invitationId)
+                .switchIfEmpty(Mono.error(new NotFoundException("NOT_FOUND", "Invitation not found")))
+                .flatMap(invitation -> {
+                    Individual individual = individualMapper.map(dto);
+                    return saveByInvitation(individual, invitation);
+                })
                 .switchIfEmpty(Mono.error(new BadRequestException("BAD_REQUEST", "Body can not be blank")))
                 .flatMap(individual -> Mono.just(new ResponseDto(ResponseStatus.SUCCESS.name(), "Individual has been successfully registered", individual.getId().toString())));
     }

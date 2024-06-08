@@ -56,7 +56,7 @@ public class ItIndividualControllerTest {
     }
 
     @Test
-    @DisplayName("registration individual")
+    @DisplayName("registrationByInvitation individual")
     public void givenIndividualDto_whenRegistration_thenResponseDtoIsReturned() {
         //given
         IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();

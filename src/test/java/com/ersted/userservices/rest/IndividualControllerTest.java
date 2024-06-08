@@ -33,12 +33,12 @@ class IndividualControllerTest {
     private IndividualService individualService;
 
     @Test
-    @DisplayName("registration individual")
+    @DisplayName("registrationByInvitation individual")
     public void givenIndividualDto_whenRegistration_thenResponseDtoIsReturned() {
         //given
         IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();
         ResponseDto successResponse = ResponseDataUtils.success("7064f21b-db21-4ef7-acf7-ac68b563b908", "Individual has been successfully registered");
-        BDDMockito.given(individualService.registration(any(IndividualDto.class)))
+        BDDMockito.given(individualService.registrationByInvitation(any(IndividualDto.class)))
                 .willReturn(Mono.just(successResponse));
         //when
         WebTestClient.ResponseSpec response = webTestClient.post()

@@ -3,6 +3,7 @@ package com.ersted.userservices.service;
 import com.ersted.userservices.entity.ProfileHistory;
 import com.ersted.userservices.repository.ProfileHistoryRepository;
 import com.ersted.userservices.utils.ProfileHistoryDataUtils;
+import io.r2dbc.postgresql.codec.Json;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +35,7 @@ class ProfileHistoryServiceTest {
         BDDMockito.given(profileHistoryRepository.save(any(ProfileHistory.class)))
                 .willReturn(Mono.just(persist));
         //when
-        StepVerifier.create(profileHistoryService.save(persist.getProfileId(),persist.getProfileType(),persist.getReason(),persist.getComment(),persist.getChangedValues()))
+        StepVerifier.create(profileHistoryService.save(persist.getProfileId(),persist.getProfileType(),persist.getReason(),persist.getComment(), persist.getChangedValues().asString()))
         //then
                 .expectNextMatches(history->!history.isNew() && persist.equals(history))
                 .verifyComplete();
@@ -47,7 +48,7 @@ class ProfileHistoryServiceTest {
         //given
         ProfileHistory persist = ProfileHistoryDataUtils.persist(null);
         //when
-        StepVerifier.create(profileHistoryService.save(persist.getProfileId(),persist.getProfileType(),persist.getReason(),persist.getComment(),persist.getChangedValues()))
+        StepVerifier.create(profileHistoryService.save(persist.getProfileId(),persist.getProfileType(),persist.getReason(),persist.getComment(),persist.getChangedValues().asString()))
                 //then
                 .expectNextCount(0)
                 .verifyComplete();

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -17,7 +18,12 @@ public class IndividualController {
 
     @PostMapping
     public Mono<?> registration(@RequestBody IndividualDto dto) {
-        return individualService.registration(dto);
+        return individualService.registrationByInvitation(dto);
+    }
+
+    @PostMapping("/{invitationId:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
+    public Mono<?> registration(@RequestBody IndividualDto dto, @PathVariable("invitationId") UUID invitationId) {
+        return individualService.registrationByInvitation(dto, invitationId);
     }
 
     @GetMapping
@@ -26,8 +32,8 @@ public class IndividualController {
     }
 
     @GetMapping("/{individualId:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
-    public Mono<?> find(@PathVariable("individualId") String individualId) {
-        return individualService.findByIdWithTransient(UUID.fromString(individualId));
+    public Mono<?> find(@PathVariable("individualId") UUID individualId) {
+        return individualService.findByIdWithTransient(individualId);
     }
 
     @PutMapping("/{individualId:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")

@@ -119,7 +119,7 @@ class IndividualServiceTest {
     }
 
     @Test
-    @DisplayName("registration individual")
+    @DisplayName("registrationByInvitation individual")
     public void givenIndividualDto_whenRegistration_thenResponseDtoIsReturned() {
         //given
         IndividualDto individualDto = IndividualDataUtils.individualDtoWithTransient();
@@ -132,7 +132,7 @@ class IndividualServiceTest {
                 .willReturn(transientIndividual);
 
         //when
-        StepVerifier.create(individualService.registration(individualDto))
+        StepVerifier.create(individualService.registrationByInvitation(individualDto))
                 //then
                 .expectNextMatches(responseDto -> Objects.nonNull(responseDto.getId())
                         && Objects.equals(IndividualDataUtils.persistIndividual().getId().toString(), responseDto.getId())
@@ -144,12 +144,12 @@ class IndividualServiceTest {
     }
 
     @Test
-    @DisplayName("registration nullable individual")
+    @DisplayName("registrationByInvitation nullable individual")
     public void givenNullableIndividualDto_whenRegistration_thenMonoErrorIsReturned() {
         //given
         IndividualDto nullableIndividualDto = null;
         //when
-        StepVerifier.create(individualService.registration(nullableIndividualDto))
+        StepVerifier.create(individualService.registrationByInvitation(nullableIndividualDto))
                 //then
                 .expectErrorMatches(throwable -> throwable instanceof BadRequestException bd
                         && "BAD_REQUEST".equals(bd.getCode())
