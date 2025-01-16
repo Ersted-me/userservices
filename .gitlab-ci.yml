@@ -1,0 +1,21 @@
+image: docker:latest
+
+services:
+  - name: docker:dind
+    command: [ "--insecure-registry=${NEXUS_REGISTRY_HOST}" ]
+
+before_script:
+  - docker info
+  - docker login -u ${NEXUS_REGISTRY_USER} -p ${NEXUS_REGISTRY_PASSWORD} ${NEXUS_REGISTRY_HOST}
+
+stages:
+  - build
+
+build-image:
+  stage: build
+  script:
+    - docker build . --tag=userservice:latest
+    - docker tag userservice:latest ${NEXUS_REGISTRY_HOST}/userservice:latest
+    - docker push ${NEXUS_REGISTRY_HOST}/userservice:latest
+  only:
+    - develop

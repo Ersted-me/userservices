@@ -12,8 +12,7 @@ java {
 }
 
 repositories {
-
-//    mavenLocal()
+    mavenLocal()
     mavenCentral()
     maven {
         name 'NEXUS'
