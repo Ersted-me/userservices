@@ -7,7 +7,7 @@ COPY build.gradle ./build.gradle
 COPY settings.gradle ./settings.gradle
 COPY gradle.properties ./gradle.properties
 
-RUN gradle build --no-daemon -x test
+RUN gradle build --no-daemon -x test --warning-mode all
 
 FROM openjdk:21-jdk-slim
 
