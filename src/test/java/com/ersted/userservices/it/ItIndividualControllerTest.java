@@ -14,7 +14,8 @@ import com.ersted.userservices.utils.AddressDataUtils;
 import com.ersted.userservices.utils.CountryDataUtils;
 import com.ersted.userservices.utils.IndividualDataUtils;
 import com.ersted.userservices.utils.UserDataUtils;
-import net.ersted.dto.IndividualDto;
+import org.springframework.test.annotation.DirtiesContext;
+import ru.ersted.common.dto.IndividualDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@DirtiesContext
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 @Import(PostgreTestContainerConfig.class)

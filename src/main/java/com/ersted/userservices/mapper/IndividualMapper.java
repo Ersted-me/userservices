@@ -1,7 +1,7 @@
 package com.ersted.userservices.mapper;
 
 import com.ersted.userservices.entity.Individual;
-import net.ersted.dto.IndividualDto;
+import ru.ersted.common.dto.IndividualDto;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

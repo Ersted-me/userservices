@@ -1,7 +1,7 @@
 package com.ersted.userservices.utils;
 
 import com.ersted.userservices.enums.ResponseStatus;
-import net.ersted.dto.ResponseDto;
+import ru.ersted.common.dto.ResponseDto;
 
 public class ResponseDataUtils {
     public static ResponseDto success(String id, String message){

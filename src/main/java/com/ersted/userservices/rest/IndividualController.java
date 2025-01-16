@@ -2,10 +2,11 @@ package com.ersted.userservices.rest;
 
 import com.ersted.userservices.service.IndividualService;
 import lombok.RequiredArgsConstructor;
-import net.ersted.dto.IndividualDto;
+
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.ersted.common.dto.IndividualDto;
 
 import java.util.List;
 import java.util.UUID;

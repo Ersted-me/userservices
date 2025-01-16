@@ -2,7 +2,7 @@ package com.ersted.userservices.rest;
 
 import com.ersted.userservices.service.InvitationService;
 import lombok.RequiredArgsConstructor;
-import net.ersted.dto.InvitationDto;
+import ru.ersted.common.dto.InvitationDto;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 

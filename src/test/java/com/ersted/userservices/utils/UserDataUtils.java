@@ -2,7 +2,7 @@ package com.ersted.userservices.utils;
 
 import com.ersted.userservices.entity.Address;
 import com.ersted.userservices.entity.User;
-import net.ersted.dto.UserDto;
+import ru.ersted.common.dto.UserDto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -8,7 +8,7 @@ import com.ersted.userservices.exception.NotFoundException;
 import com.ersted.userservices.mapper.IndividualMapper;
 import com.ersted.userservices.repository.IndividualRepository;
 import com.ersted.userservices.utils.IndividualDataUtils;
-import net.ersted.dto.IndividualDto;
+import ru.ersted.common.dto.IndividualDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

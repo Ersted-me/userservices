@@ -5,8 +5,8 @@ import com.ersted.userservices.exception.NotFoundException;
 import com.ersted.userservices.mapper.InvitationMapper;
 import com.ersted.userservices.repository.InvitationRepository;
 import lombok.RequiredArgsConstructor;
-import net.ersted.dto.InvitationDto;
-import net.ersted.dto.ResponseDto;
+import ru.ersted.common.dto.InvitationDto;
+import ru.ersted.common.dto.ResponseDto;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 

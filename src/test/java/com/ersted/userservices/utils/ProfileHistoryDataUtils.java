@@ -1,6 +1,7 @@
 package com.ersted.userservices.utils;
 
 import com.ersted.userservices.entity.ProfileHistory;
+import io.r2dbc.postgresql.codec.Json;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,14 +16,14 @@ public class ProfileHistoryDataUtils {
                 .profileType("some type")
                 .reason("reason")
                 .comment("comment")
-                .changedValues("""
+                .changedValues(Json.of("""
                         {
                           "user": {
                             "firstName": "update name"
                           },
                           "email": "update@mail.ru"
                         }
-                        """)
+                        """))
                 .build();
     }
 }

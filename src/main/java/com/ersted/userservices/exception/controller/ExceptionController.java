@@ -1,7 +1,7 @@
 package com.ersted.userservices.exception.controller;
 
 import com.ersted.userservices.exception.NotFoundException;
-import net.ersted.dto.ExceptionDto;
+import ru.ersted.common.dto.ExceptionDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

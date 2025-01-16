@@ -12,12 +12,23 @@ java {
 }
 
 repositories {
-    mavenLocal()
+
+//    mavenLocal()
     mavenCentral()
+    maven {
+        name 'NEXUS'
+        url System.getenv("NEXUS_MAVEN_REPOSITORY_URL")
+        credentials {
+            username System.getenv("NEXUS_REPOSITORY_USER")
+            password System.getenv("NEXUS_REPOSITORY_PASSWORD")
+        }
+        allowInsecureProtocol = true
+    }
 }
 
 dependencies {
-    implementation "net.ersted:common:1.0.0"
+    implementation 'ru.ersted:common-dtos:1.0.0-SNAPSHOT'
+    implementation 'ru.ersted:common-clients:1.0.0-SNAPSHOT'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
@@ -36,6 +47,7 @@ dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:$orgMapstructMapstructProcessor"
 
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonDataFormatXmlVersion"
+    implementation 'com.google.guava:guava:33.4.0-jre'
 
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
