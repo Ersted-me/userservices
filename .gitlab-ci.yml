@@ -14,7 +14,11 @@ stages:
 build-image:
   stage: build
   script:
-    - docker build . --tag=userservice:latest
+    - docker build . --tag=userservice:latest \ 
+      --build-arg NEXUS_MAVEN_REPOSITORY_URL=${NEXUS_MAVEN_REPOSITORY_URL} \
+      --build-arg NEXUS_REPOSITORY_USER=${NEXUS_REPOSITORY_USER} \
+      --build-arg NEXUS_REPOSITORY_PASSWORD=${NEXUS_REPOSITORY_PASSWORD}
+
     - docker tag userservice:latest ${NEXUS_REGISTRY_HOST}/userservice:latest
     - docker push ${NEXUS_REGISTRY_HOST}/userservice:latest
   only:
